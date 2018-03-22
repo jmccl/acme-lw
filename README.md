@@ -10,23 +10,23 @@ This project is yet another [_Let's Encrypt_](https://letsencrypt.org) client. I
 
 Building requires cmake, openssl and curl. On debian based systems this will install them.
 
-<code>
+```
 apt-get install cmake libssl-dev libcurl4-gnutls-dev
-</code>
+```
 
 To build and install run:
 
-<code>
+```
 cmake .
 make
 make install
-</code>
+```
 
 To run against the _Let's Encrypt_ staging environment generate your makefiles with this.
 
-<code>
+```
 cmake -D STAGING=ON .
-</code>
+```
 
 #### Let's Encrypt Credentials
 
@@ -39,17 +39,17 @@ format. The [acme-tiny](https://github.com/diafygi/acme-tiny) library has good d
 
 The command line client is run as follows.
 
-<code>
+```
 acme-lw-client <filename of account private key> <domain name> ...
-</code>
+```
 
 Multiple domain names can be on the command line.
 
 The behavior is similar to the official _Let's Encrypt_ client run as follows:
 
-<code>
+```
 certbot certonly --manual -d <domain name>
-</code>
+```
 
 #### Library API
 
