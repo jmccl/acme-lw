@@ -12,7 +12,7 @@ Building requires cmake, openssl and curl. On debian based systems this will ins
 
 <code>
 apt-get install cmake libssl-dev libcurl4-gnutls-dev
-<code>
+</code>
 
 To build and install run:
 
