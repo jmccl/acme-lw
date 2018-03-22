@@ -1,6 +1,8 @@
 #include "acme-lw.h"
 #include "http.h"
 
+// From here: https://github.com/nlohmann/json/blob/develop/single_include/nlohmann/json.hpp
+// This should probably be a git submodule, but the repo is huge.
 #include "json.hpp"
 
 #include <stdio.h>
