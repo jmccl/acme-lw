@@ -21,10 +21,11 @@
 
 # Executables
 *.exe
-acme-lw-client
+acme_lw_client
 
 # CMake
 CMakeCache.txt
 Makefile
 CMakeFiles
 *.cmake
+install_manifest.txt

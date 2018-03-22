@@ -40,7 +40,7 @@ format. The [acme-tiny](https://github.com/diafygi/acme-tiny) library has good d
 The command line client is run as follows.
 
 ```
-acme-lw-client <filename of account private key> <domain name> ...
+acme_lw_client <filename of account private key> <domain name> ...
 ```
 
 Multiple domain names can be on the command line.
