@@ -39,7 +39,7 @@ struct Certificate
     std::string getExpiryDisplay() const;
 };
 
-class AcmeClientImpl;
+struct AcmeClientImpl;
 
 class AcmeClient
 {
