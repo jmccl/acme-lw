@@ -60,6 +60,12 @@ All methods report errors by throwing std::exception, which will normally be an 
 Note that this means you should compile your client code and this code with the same compiler and ideally with
 the same compiler options.
 
+If your code is in _main.cpp_, something like this will build and link.
+
+```
+g++ main.cpp -lacme_lw -lcurl -lcrypto
+```
+
 #### Security
 
 The library itself is fairly agnostic about security. It doesn't read or write to disk. If you use the library
