@@ -17,5 +17,3 @@ add_compile_options (-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-qua
 
 add_subdirectory (lib)
 add_subdirectory (main)
-
-# install (TARGETS acme-lw-client DESTINATION bin)
