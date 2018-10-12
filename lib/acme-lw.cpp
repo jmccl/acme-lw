@@ -487,6 +487,11 @@ struct AcmeClientImpl
 
     Certificate issueCertificate(const list<string>& domainNames, AcmeClient::Callback callback)
     {
+        if (domainNames.empty())
+        {
+            throw AcmeException("There must be at least one domain name in a certificate");
+        }
+
         // Pass any challenges we need to pass to make the CA believe we're
         // entitled to a certificate.
         for (const string& domain : domainNames)
