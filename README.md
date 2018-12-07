@@ -8,10 +8,16 @@ This project is yet another [_Let's Encrypt_](https://letsencrypt.org) client. I
 
 #### Building and Installing
 
-Building requires cmake, openssl and curl. On debian based systems this will install them.
+Building requires cmake, openssl and curl. On Debian based systems this will install them.
 
 ```
 apt-get install cmake libssl-dev libcurl4-gnutls-dev
+```
+
+On Red Hat based systems this will do it.
+
+```
+yum install cmake openssl-devel curl-devel
 ```
 
 To build and install run:
