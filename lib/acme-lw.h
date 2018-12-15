@@ -24,7 +24,7 @@ struct Certificate
         enough for the purpose of determining whether the certificate
         needs to be renewed.
     */
-    long getExpiry() const;
+    ::time_t getExpiry() const;
 
     /**
         Returns the 'Not After' result that openssl would display if

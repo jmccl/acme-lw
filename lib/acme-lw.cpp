@@ -598,7 +598,7 @@ void AcmeClient::teardown()
     teardownHttp();
 }
 
-long Certificate::getExpiry() const
+::time_t Certificate::getExpiry() const
 {
     return extractExpiryData<long>(*this, [](const ASN1_TIME * t)
         {
