@@ -600,7 +600,7 @@ void AcmeClient::teardown()
 
 ::time_t Certificate::getExpiry() const
 {
-    return extractExpiryData<long>(*this, [](const ASN1_TIME * t)
+  return extractExpiryData<::time_t>(*this, [](const ASN1_TIME * t)
         {
             // See this link for issues in converting from ASN1_TIME to epoch time.
             // https://stackoverflow.com/questions/10975542/asn1-time-to-time-t-conversion
