@@ -70,8 +70,8 @@ public:
                                 const std::string& keyAuthorization);
 
     /**
-        Issue a certificate for the domainNames. If there is more than one, the
-        first one will be the 'Subject' (CN) in the certificate.
+        Issue a certificate for the domainNames.
+        The first one will be the 'Subject' (CN) in the certificate.
 
         throws std::exception, usually an instance of AcmeException
     */
