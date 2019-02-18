@@ -30,7 +30,7 @@ struct Certificate
         Returns the 'Not After' result that openssl would display if
         running the following command.
 
-            openssl x509 -noout -in fullchain.pem  -text
+            openssl x509 -noout -in fullchain.pem -text
 
         For example:
 
