@@ -80,7 +80,7 @@ public:
     // Call once before instantiating AcmeClient.
     static void init();
 
-    // Call once before application shutdown. Not thread safe.
+    // Call once before application shutdown.
     static void teardown();
 
 private:
