@@ -58,7 +58,7 @@ public:
 
         The callback may be called once for each domain name in the
         'issueCertificate' call. The callback should do whatever is
-        needed so that a GET on the url returns the 'keyAuthorization',
+        needed so that a GET on the 'url' returns the 'keyAuthorization',
         (which is what the Acme protocol calls the expected response.)
 
         Note that this function may not be called in cases where
@@ -77,7 +77,7 @@ public:
     */
     Certificate issueCertificate(const std::list<std::string>& domainNames, Callback);
 
-    // Call once before instantiating AcmeClient. Not thread safe.
+    // Call once before instantiating AcmeClient.
     static void init();
 
     // Call once before application shutdown. Not thread safe.
