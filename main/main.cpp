@@ -23,7 +23,7 @@ void handleChallenge(const string& domain, const string& url, const string& keyA
             << "Hit any key when done";
 
     getchar();
-    cout << "\n";
+    cout << "\n***\n";
 }
 
 }
