@@ -46,7 +46,9 @@ size_t headerCallback(void * buffer, size_t size, size_t nmemb, void * h)
     size_t byteCount = size * nmemb;
     if (byteCount >= header.first.size())
     {
-        if (!strncmp(header.first.c_str(), reinterpret_cast<const char *>(buffer), header.first.size()))
+        // Header names are case insensitive per RFC 7230. Let's Encrypt's move
+        // to a CDN made the headers lower case.
+        if (!strncasecmp(header.first.c_str(), reinterpret_cast<const char *>(buffer), header.first.size()))
         {
             string line(reinterpret_cast<const char *>(buffer), byteCount);
 
