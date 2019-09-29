@@ -99,7 +99,7 @@ void teardownHttp()
     curl_global_cleanup();
 }
 
-void doCurl(Ptr& curl, const string& url)
+void doCurl(Ptr& curl, const string& url, const vector<char>& response)
 {
     auto res = curl_easy_perform(*curl);
     if (res != CURLE_OK)
@@ -112,7 +112,8 @@ void doCurl(Ptr& curl, const string& url)
     if (responseCode / 100 != 2)
     {
         // If it's not a 2xx response code, throw.
-        throw AcmeException("Response code of "s + to_string(responseCode) + " contacting " + url);
+        throw AcmeException("Response code of "s + to_string(responseCode) + " contacting " + url + 
+                            " with response of:\n" + string(&response.front(), response.size()));
     }
 }
 
@@ -129,7 +130,10 @@ string getHeader(const string& url, const string& headerKey)
     pair<string, string> header = make_pair(headerKey, ""s);
     curl_easy_setopt(*curl, CURLOPT_HEADERDATA, &header);
 
-    doCurl(curl, url);
+    // There will be no response (probably). We just pass this
+    // for error handling
+    vector<char> response;
+    doCurl(curl, url, response);
 
     return header.second;
 }
@@ -155,7 +159,7 @@ Response doPost(const string& url, const string& postBody, const char * headerKe
         curl_easy_setopt(*curl, CURLOPT_HEADERDATA, &header);
     }
 
-    doCurl(curl, url);
+    doCurl(curl, url, response.response_);
 
     response.headerValue_ = header.second;
 
@@ -172,7 +176,7 @@ vector<char> doGet(const string& url)
     curl_easy_setopt(*curl, CURLOPT_WRITEFUNCTION, dataCallback);
     curl_easy_setopt(*curl, CURLOPT_WRITEDATA, &response);
 
-    doCurl(curl, url);
+    doCurl(curl, url, response);
 
     return response;
 }
