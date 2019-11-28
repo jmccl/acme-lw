@@ -152,6 +152,9 @@ Response doPost(const string& url, const string& postBody, const char * headerKe
     curl_easy_setopt(*curl, CURLOPT_WRITEFUNCTION, dataCallback);
     curl_easy_setopt(*curl, CURLOPT_WRITEDATA, &response.response_);
 
+    curl_slist h = { const_cast<char *>("Content-Type: application/jose+json"), nullptr };
+    curl_easy_setopt(*curl, CURLOPT_HTTPHEADER, &h);
+
     pair<string, string> header;
     if (headerKey)
     {

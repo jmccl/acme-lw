@@ -5,6 +5,7 @@ This project is yet another [_Let's Encrypt_](https://letsencrypt.org) client. I
 * The main artifact is a C++ static library.
 * Functionality only supports creating and updating certificates using http challenges.
 * All code runs 'in process', i.e., no processes are spawned.
+* It runs against the 'V2' (most recent) version of the _Let's Encrypt_ API.
 
 #### Building and Installing
 

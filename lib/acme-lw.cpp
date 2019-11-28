@@ -6,7 +6,6 @@
 #include "json.hpp"
 
 #include <stdio.h>
-#include <iostream>
 
 #include <openssl/evp.h>
 #include <openssl/pem.h>
@@ -29,13 +28,10 @@ namespace
 {
 
 #ifdef STAGING
-const char * directoryUrl = "https://acme-staging.api.letsencrypt.org/directory";
+const char * directoryUrl = "https://acme-staging-v02.api.letsencrypt.org/directory";
 #else
-const char * directoryUrl = "https://acme-v01.api.letsencrypt.org/directory";
+const char * directoryUrl = "https://acme-v02.api.letsencrypt.org/directory";
 #endif
-
-string newAuthZUrl;
-string newCertUrl;
 
 // Smart pointers for OpenSSL types
 template<typename TYPE, void (*FREE)(TYPE *)>
@@ -297,35 +293,6 @@ pair<string, string> makeCertificateSigningRequest(const std::list<std::string>&
     return make_pair(urlSafeBase64Encode(toVector(*reqBio)), privateKey);
 }
 
-// Convert certificate from DER format to PEM format
-string DERtoPEM(const vector<char>& der)
-{
-    BIOptr derBio(BIO_new(BIO_s_mem()));
-    BIO_write(*derBio, &der.front(), der.size());
-    X509ptr x509(d2i_X509_bio(*derBio, nullptr));
-
-    BIOptr pemBio(BIO_new(BIO_s_mem()));
-    PEM_write_bio_X509(*pemBio, *x509);
-
-    return toString(*pemBio);;
-}
-
-string getIntermediateCertificate(const string& linkHeader)
-{
-    // Link: <https://acme-v01.api.letsencrypt.org/acme/issuer-cert>;rel="up"
-    static std::regex linkRegex("^<(.*)>;rel=\"up\"$");
-
-    std::smatch match;
-    if (!std::regex_match(linkHeader, match, linkRegex))
-    {
-        throw acme_lw::AcmeException("Unable to parse 'Link' header with value "s + linkHeader);
-    }
-
-    string url = match[1];
-
-    return DERtoPEM(doGet(url));
-}
-
 string sha256(const string& s)
 {
     vector<unsigned char> hash(SHA256_DIGEST_LENGTH);
@@ -371,6 +338,10 @@ T extractExpiryData(const acme_lw::Certificate& certificate, const function<T (c
 namespace acme_lw
 {
 
+string newAccountUrl;
+string newOrderUrl;
+string newNonceUrl;
+
 struct AcmeClientImpl
 {
     AcmeClientImpl(const string& accountPrivateKey)
@@ -394,6 +365,7 @@ struct AcmeClientImpl
             const BIGNUM *n, *e, *d;
             RSA_get0_key(rsa, &n, &e, &d);
 
+            // Note json keys must be in lexographical order.
             string jwkValue = u8R"( {
                                         "e":")"s + urlSafeBase64Encode(e) + u8R"(",
                                         "kty": "RSA",
@@ -401,9 +373,22 @@ struct AcmeClientImpl
                                     })";
             jwkThumbprint_ = makeJwkThumbprint(jwkValue);
 
+            // We use jwk for the first request, which allows us to get 
+            // the account id. We use that thereafter.
             headerSuffix_ = u8R"(
                     "alg": "RS256",
                     "jwk": )" + jwkValue + "}";
+
+            pair<string, string> header = make_pair("location"s, ""s);
+            sendRequest<string>(newAccountUrl, u8R"(
+                                                    {
+                                                        "termsOfServiceAgreed": true,
+                                                        "onlyReturnExisting": true
+                                                    }
+                                                   )", &header);
+            headerSuffix_ = u8R"(
+                    "alg": "RS256",
+                    "kid": ")" + header.second + "\"}";
         }
     }
 
@@ -436,7 +421,8 @@ struct AcmeClientImpl
     T sendRequest(const string& url, const string& payload, pair<string, string> * header = nullptr)
     {
         string protectd = u8R"({"nonce": ")"s +
-                                    getHeader(directoryUrl, "Replay-Nonce") + "\"," +
+                                    getHeader(newNonceUrl, "replay-nonce") + "\"," +
+                                    u8R"("url": ")" + url + "\"," +
                                     headerSuffix_;
 
         protectd = urlSafeBase64Encode(protectd);
@@ -459,30 +445,38 @@ struct AcmeClientImpl
         return toT<T>(response.response_);
     }
 
-    // Throws if the challenge isn't accepted (or on timeout)
-    void verifyChallengePassed(const nlohmann::json& challenge, const string& keyAuthorization)
+    void wait(const string& url, const char * errorText)
     {
-        // Tell the CA we're prepared for the challenge.
-        string verificationUri = challenge["uri"];
-        sendRequest<string>(verificationUri, u8R"(  {
-                                                        "resource": "challenge",
-                                                        "keyAuthorization": ")"s + keyAuthorization + "\"}");
-
-        // Poll waiting for the CA to verify the challenge
+        // Poll waiting for response to the url be 'status': 'valid'
         int counter = 0;
         constexpr int count = 10;
         do
         {
             ::usleep(1'000'000);    // sleep for a second
-            string response = toT<string>(doGet(verificationUri));
+            string response = toT<string>(doGet(url));
             auto json = nlohmann::json::parse(response);
-            if (json["status"] == "valid")
+            if (json.at("status") == "valid")
             {
                 return;
             }
         } while (counter++ < count);
 
-        throw AcmeException("Failure / timeout verifying challenge passed");
+        throw AcmeException(errorText);
+    }
+
+    // Throws if the challenge isn't accepted (or on timeout)
+    void verifyChallengePassed(const nlohmann::json& challenge)
+    {
+        // Tell the CA we're prepared for the challenge.
+        string verificationUrl = challenge.at("url");
+        auto response = nlohmann::json::parse(sendRequest<string>(verificationUrl, "{}"));
+        if (response.at("status") == "valid")
+        {
+            return;
+        }
+        
+        string challengeStatusUrl = response.at("url");
+        wait(challengeStatusUrl, "Failure / timeout verifying challenge passed");
     }
 
     Certificate issueCertificate(const list<string>& domainNames, AcmeClient::Callback callback)
@@ -492,25 +486,36 @@ struct AcmeClientImpl
             throw AcmeException("There must be at least one domain name in a certificate");
         }
 
-        // Pass any challenges we need to pass to make the CA believe we're
-        // entitled to a certificate.
+        // Create the order        
+        string payload = u8R"({"identifiers": [)";
+        bool first = true;
         for (const string& domain : domainNames)
         {
-            string payload = u8R"(
-                                {
-                                    "resource": "new-authz",
-                                    "identifier":
-                                    {
-                                        "type": "dns",
-                                        "value": ")"s + domain + u8R"("
-                                    }
-                                }
-                                )";
+            if (!first)
+            {
+                payload += ",";
+            }
+            first = false;
 
-            string response = sendRequest<string>(newAuthZUrl, payload);
+            payload += u8R"(
+                            {
+                                "type": "dns",
+                                "value": ")"s + domain + u8R"("
+                            }
+                           )";
+        }
+        payload += "]}";
 
-            auto json = nlohmann::json::parse(response);
+        pair<string, string> header = make_pair("location"s, ""s);
+        string response = sendRequest<string>(newOrderUrl, payload, &header);
+        string currentOrderUrl = header.second;
 
+        // Pass the challenges
+        auto json = nlohmann::json::parse(response);
+        auto authorizations = json.at("authorizations");
+        for (const string& authorization : authorizations)
+        {
+            auto authz = nlohmann::json::parse(toT<string>(doGet(authorization)));
             /**
              * If you pass a challenge, that's good for 300 days. The cert is only good for 90.
              * This means for a while you can re-issue without passing another challenge, so we
@@ -520,40 +525,40 @@ struct AcmeClientImpl
              * by the time the certificate is requested. The assumption is that client retries
              * will deal with this.
              */
-            if (json["status"] != "valid")
+            if (authz.at("status") != "valid")
             {
-                auto challenges = json["challenges"];
+                auto challenges = authz.at("challenges");
                 for (const auto& challenge : challenges)
                 {
-                    if (challenge["type"] == "http-01")
+                    if (challenge.at("type") == "http-01")
                     {
-                        string token = challenge["token"];
+                        string token = challenge.at("token");
+                        string domain = authz.at("identifier").at("value");
                         string url = "http://"s + domain + "/.well-known/acme-challenge/" + token;
                         string keyAuthorization = token + "." + jwkThumbprint_;
                         callback(domain, url, keyAuthorization);
 
-                        verifyChallengePassed(challenge, keyAuthorization);
-                        break;
+                        verifyChallengePassed(challenge);
                     }
                 }
             }
         }
 
-        // Issue the certificate
+        // Request the certificate
         auto r = makeCertificateSigningRequest(domainNames);
         string csr = r.first;
         string privateKey = r.second;
+        string certificateUrl = nlohmann::json::parse(sendRequest<vector<char>>(json.at("finalize"),
+                                                u8R"(   {
+                                                            "csr": ")"s + csr + u8R"("
+                                                        })")).at("certificate");
 
-        pair<string, string> header = make_pair("Link"s, ""s);
+        // Wait for the certificate to be produced
+        wait(currentOrderUrl, "Timeout / failure waiting for certificate to be produced");
 
-        auto der = sendRequest<vector<char>>(newCertUrl,
-                    u8R"(   {
-                                "resource": "new-cert",
-                                "csr": ")"s + csr + u8R"("
-                             })", &header);
-
+        // Retreive the certificate
         Certificate cert;
-        cert.fullchain = DERtoPEM(der) + getIntermediateCertificate(header.second);
+        cert.fullchain = toT<string>(doGet(certificateUrl));
         cert.privkey = privateKey;
         return cert;
     }
@@ -584,8 +589,9 @@ void AcmeClient::init()
     {
         string directory = toT<string>(doGet(directoryUrl));
         auto json = nlohmann::json::parse(directory);
-        newAuthZUrl = json["new-authz"];
-        newCertUrl = json["new-cert"];
+        newAccountUrl = json.at("newAccount");
+        newOrderUrl = json.at("newOrder");
+        newNonceUrl = json.at("newNonce");
     }
     catch (const exception& e)
     {
