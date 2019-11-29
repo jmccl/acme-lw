@@ -539,7 +539,7 @@ struct AcmeClientImpl
                         callback(domain, url, keyAuthorization);
 
                         verifyChallengePassed(challenge);
-                        continue;
+                        break;
                     }
                 }
             }
