@@ -6,6 +6,7 @@ find_package (OpenSSL REQUIRED)
 
 set (acme_lw_client_VERSION_MAJOR 0)
 set (acme_lw_client_VERSION_MINOR 2)
+set (acme_lw_client_VERSION_PATCH 1)
 set (CMAKE_CXX_STANDARD 14)
 
 OPTION(STAGING "Run against the Let's Encrypt staging environment" OFF)
