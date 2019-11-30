@@ -14,7 +14,6 @@
 
 #include <algorithm>
 #include <ctype.h>
-#include <regex>
 #include <sstream>
 #include <vector>
 
