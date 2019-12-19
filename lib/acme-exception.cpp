@@ -12,7 +12,7 @@ AcmeException::AcmeException(const string& s)
     // We assume the error is going to be from openssl. If it's not, we just
     // use the string passed in as the error message.
     unsigned long err = ERR_get_error();
-    while (ERR_get_error()); // clear any previous errors we didn't deal with for some ereason;
+    while (ERR_get_error()); // clear any previous errors we didn't deal with for some reason;
 
     if (err)
     {
