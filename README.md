@@ -37,7 +37,7 @@ cmake -D STAGING=ON .
 
 #### Let's Encrypt Credentials
 
-To use any _Let's Encrypt_ client you need to sign requests with your _Let's Encrypt_'s account's private key.
+To use any _Let's Encrypt_ client you need to sign requests with your existing _Let's Encrypt_'s account's private key.
 This library uses a private key in PEM format. If you want to use an existing _Let's Encrypt_ private key, it's in JWK
 format. The [acme-tiny](https://github.com/diafygi/acme-tiny) library has good documentation on
 [how to convert](https://github.com/diafygi/acme-tiny#use-existing-lets-encrypt-key) it.
