@@ -3,7 +3,6 @@
 #include <cerrno>
 #include <fstream>
 #include <iostream>
-#include <sstream>
 
 #include <experimental/filesystem>
 
