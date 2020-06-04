@@ -28,11 +28,6 @@ AcmeException::AcmeException(const string& s)
     }
 }
 
-AcmeException::AcmeException()
-    : AcmeException("")
-{
-}
-
 const char * AcmeException::what() const noexcept
 {
     return  what_.c_str();

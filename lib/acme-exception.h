@@ -9,7 +9,6 @@ namespace acme_lw
 class AcmeException : public std::exception
 {
 public:
-    AcmeException();
     AcmeException(const std::string&);
 
     virtual const char * what() const noexcept override;

@@ -143,6 +143,10 @@ string toString(BIO *bio)
 template<typename T>
 string base64Encode(const T& t)
 {
+    if (!t.size())
+    {
+        return "";
+    }
     // Use openssl to do this since we're already linking to it.
 
     // Don't need (or want) a BIOptr since BIO_push chains it to b64
@@ -157,7 +161,7 @@ string base64Encode(const T& t)
     if (BIO_write(*b64, &t.front(), t.size()) <= 0 ||
         BIO_flush(*b64) < 0)
     {
-        throw acme_lw::AcmeException();
+        throw acme_lw::AcmeException("Failure in BIO_write / BIO_flush");
     }
 
     return toString(bio);
@@ -191,7 +195,6 @@ string urlSafeBase64Encode(const T& t)
     return s;
 }
 
-// Url safe encoding
 string urlSafeBase64Encode(const BIGNUM * bn)
 {
     int numBytes = BN_num_bytes(bn);
@@ -207,7 +210,7 @@ pair<string, string> makeCertificateSigningRequest(const std::list<std::string>&
     BIGNUMptr bn(BN_new());
     if (!BN_set_word(*bn, RSA_F4))
     {
-        throw acme_lw::AcmeException();
+        throw acme_lw::AcmeException("Failure in BN_set_word");
     }
 
     RSAptr rsa(RSA_new());
@@ -215,7 +218,7 @@ pair<string, string> makeCertificateSigningRequest(const std::list<std::string>&
     int bits = 2048;
     if (!RSA_generate_key_ex(*rsa, bits, *bn, nullptr))
     {
-        throw acme_lw::AcmeException();
+        throw acme_lw::AcmeException("Failure in RSA_generate_key_ex");
     }
 
     X509_REQptr req(X509_REQ_new());
@@ -229,7 +232,7 @@ pair<string, string> makeCertificateSigningRequest(const std::list<std::string>&
                                     reinterpret_cast<const unsigned char*>(name->c_str()),
                                     -1, -1, 0))
     {
-        throw acme_lw::AcmeException();
+        throw acme_lw::AcmeException("Failure in X509_Name_add_entry_by_txt");
     }
 
     if (++name != domainNames.end())
@@ -261,32 +264,32 @@ pair<string, string> makeCertificateSigningRequest(const std::list<std::string>&
     EVP_PKEYptr key(EVP_PKEY_new());
     if (!EVP_PKEY_assign_RSA(*key, *rsa))
     {
-        throw acme_lw::AcmeException();
+        throw acme_lw::AcmeException("Failure in EVP_PKEY_assign_RSA");
     }
     rsa.clear();     // rsa will be freed when key is freed.
 
     BIOptr keyBio(BIO_new(BIO_s_mem()));
     if (PEM_write_bio_PrivateKey(*keyBio, *key, nullptr, nullptr, 0, nullptr, nullptr) != 1)
     {
-        throw acme_lw::AcmeException();
+        throw acme_lw::AcmeException("Failure in PEM_write_bio_PrivateKey");
     }
 
     string privateKey = toString(*keyBio);
 
     if (!X509_REQ_set_pubkey(*req, *key))
     {
-        throw acme_lw::AcmeException();
+        throw acme_lw::AcmeException("Failure in X509_REQ_set_pubkey");
     }
 
     if (!X509_REQ_sign(*req, *key, EVP_sha256()))
     {
-        throw acme_lw::AcmeException();
+        throw acme_lw::AcmeException("Failure in X509_REQ_sign");
     }
 
     BIOptr reqBio(BIO_new(BIO_s_mem()));
     if (i2d_X509_REQ_bio(*reqBio, *req) < 0)
     {
-        throw acme_lw::AcmeException();
+        throw acme_lw::AcmeException("Failure in i2d_X509_REQ_bio");
     }
 
     return make_pair(urlSafeBase64Encode(toVector(*reqBio)), privateKey);
@@ -323,7 +326,7 @@ T extractExpiryData(const acme_lw::Certificate& certificate, const function<T (c
     BIOptr bio(BIO_new(BIO_s_mem()));
     if (BIO_write(*bio, &certificate.fullchain.front(), certificate.fullchain.size()) <= 0)
     {
-        throw acme_lw::AcmeException();
+        throw acme_lw::AcmeException("Failure in BIO_write");
     }
     X509ptr x509(PEM_read_bio_X509(*bio, nullptr, nullptr, nullptr));
 
@@ -444,6 +447,12 @@ struct AcmeClientImpl
         return toT<T>(response.response_);
     }
 
+    // https://tools.ietf.org/html/rfc8555#section-6.3
+    string doPostAsGet(const string& url)
+    {
+        return sendRequest<string>(url, "");
+    }
+
     void wait(const string& url, const char * errorText)
     {
         // Poll waiting for response to the url be 'status': 'valid'
@@ -452,7 +461,7 @@ struct AcmeClientImpl
         do
         {
             ::usleep(1'000'000);    // sleep for a second
-            string response = toT<string>(doGet(url));
+            string response = doPostAsGet(url);
             auto json = nlohmann::json::parse(response);
             if (json.at("status") == "valid")
             {
@@ -514,7 +523,7 @@ struct AcmeClientImpl
         auto authorizations = json.at("authorizations");
         for (const string& authorization : authorizations)
         {
-            auto authz = nlohmann::json::parse(toT<string>(doGet(authorization)));
+            auto authz = nlohmann::json::parse(doPostAsGet(authorization));
             /**
              * If you pass a challenge, that's good for 300 days. The cert is only good for 90.
              * This means for a while you can re-issue without passing another challenge, so we
@@ -558,7 +567,7 @@ struct AcmeClientImpl
 
         // Retreive the certificate
         Certificate cert;
-        cert.fullchain = toT<string>(doGet(certificateUrl));
+        cert.fullchain = doPostAsGet(certificateUrl);
         cert.privkey = privateKey;
         return cert;
     }
@@ -614,7 +623,7 @@ void AcmeClient::teardown()
             int days, seconds;
             if (!ASN1_TIME_diff(&days, &seconds, nullptr, t))
             {
-                throw AcmeException();
+                throw AcmeException("Failure in ASN1_TIME_diff");
             }
 
             // Hackery here, since the call to time(0) will not necessarily match
@@ -631,7 +640,7 @@ string Certificate::getExpiryDisplay() const
             BIOptr b(BIO_new(BIO_s_mem()));
             if (!ASN1_TIME_print(*b, t))
             {
-                throw AcmeException();
+                throw AcmeException("Failure in BIO_new");
             }
 
             return toString(*b);
