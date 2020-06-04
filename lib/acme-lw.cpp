@@ -640,7 +640,7 @@ string Certificate::getExpiryDisplay() const
             BIOptr b(BIO_new(BIO_s_mem()));
             if (!ASN1_TIME_print(*b, t))
             {
-                throw AcmeException("Failure in BIO_new");
+                throw AcmeException("Failure in ASN1_TIME_print");
             }
 
             return toString(*b);
