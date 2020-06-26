@@ -77,7 +77,12 @@ public:
     */
     Certificate issueCertificate(const std::list<std::string>& domainNames, Callback);
 
-    // Call once before instantiating AcmeClient.
+    /**
+        Call once before instantiating AcmeClient.
+        
+        Note that this calls Let's Encrypt servers and so can throw
+        if they're having issues.
+    */
     static void init();
 
     // Call once before application shutdown.
