@@ -13,7 +13,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-      name: install packages
+    - name: install packages
       run: sudo apt-get install cmake libssl-dev libcurl4-gnutls-dev
     - name: configure
       run: cmake .
