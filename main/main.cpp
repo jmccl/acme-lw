@@ -130,7 +130,7 @@ void writeFile(const string& fileName, const string& contents)
 
     rawWriteFile(fileName, "");
     filesystem::permissions(fileName, filesystem::perms::owner_read |
-                                                    filesystem::perms::owner_write);
+                                      filesystem::perms::owner_write);
     rawWriteFile(fileName, contents);
 }
 

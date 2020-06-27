@@ -521,7 +521,7 @@ struct AcmeClientImpl
         // Pass the challenges
         auto json = nlohmann::json::parse(response);
         auto authorizations = json.at("authorizations");
-        for (const string& authorization : authorizations)
+        for (const auto& authorization : authorizations)
         {
             auto authz = nlohmann::json::parse(doPostAsGet(authorization));
             /**
