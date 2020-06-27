@@ -7,4 +7,4 @@ install (FILES acme-exception.h acme-lw.h DESTINATION include)
 
 target_include_directories(acme_lw PUBLIC ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../internal ${OPENSSL_INCLUDE_DIR})
 
-target_link_libraries(acme_lw PRIVATE crypto)
+target_link_libraries(acme_lw PRIVATE ${OPENSSL_LIBRARIES})
