@@ -3,8 +3,9 @@
 #include <cerrno>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
-#include <experimental/filesystem>
+#include <filesystem>
 
 using namespace std;
 
@@ -128,8 +129,8 @@ void writeFile(const string& fileName, const string& contents)
     }
 
     rawWriteFile(fileName, "");
-    experimental::filesystem::permissions(fileName, experimental::filesystem::perms::owner_read |
-                                                    experimental::filesystem::perms::owner_write);
+    filesystem::permissions(fileName, filesystem::perms::owner_read |
+                                                    filesystem::perms::owner_write);
     rawWriteFile(fileName, contents);
 }
 
