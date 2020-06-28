@@ -7,10 +7,10 @@
 
 #ifdef EXPERIMENTAL_FILESYSTEM
 #include <experimental/filesystem>
-
-using namespace std::experimental;
+namespace fs = std::experimental::filesystem;
 #else
 #include <filesystem>
+namespace fs = std::filesystem;
 #endif
 
 using namespace std;
@@ -135,8 +135,7 @@ void writeFile(const string& fileName, const string& contents)
     }
 
     rawWriteFile(fileName, "");
-    filesystem::permissions(fileName, filesystem::perms::owner_read |
-                                      filesystem::perms::owner_write);
+    fs::permissions(fileName, fs::perms::owner_read | fs::perms::owner_write);
     rawWriteFile(fileName, contents);
 }
 
