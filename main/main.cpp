@@ -5,7 +5,13 @@
 #include <iostream>
 #include <sstream>
 
+#ifdef EXPERIMENTAL_FILESYSTEM
+#include <experimental/filesystem>
+
+using namespace std::experimental;
+#else
 #include <filesystem>
+#endif
 
 using namespace std;
 
