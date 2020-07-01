@@ -21,6 +21,8 @@ On Red Hat based systems this will do it.
 yum install cmake openssl-devel curl-devel
 ```
 
+This also builds on macOS and if you're doing that you'll be able to install prerequisites with your package manager of choice.
+
 To build and install run:
 
 ```
