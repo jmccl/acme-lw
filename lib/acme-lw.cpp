@@ -46,7 +46,7 @@ struct Ptr
     {
         if (!ptr_)
         {
-            throw acme_lw::AcmeException("Out of memory?");
+            throw acme_lw::AcmeException("Failed to create OpenSSL type");
         }
     }
 
@@ -62,7 +62,7 @@ struct Ptr
     {
         if (!ptr.ptr_)
         {
-            throw acme_lw::AcmeException("Out of memory?");
+            throw acme_lw::AcmeException("Failed to create OpenSSL type");
         }
 
         ptr_ = move(ptr.ptr_);

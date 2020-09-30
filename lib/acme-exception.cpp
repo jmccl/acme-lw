@@ -20,7 +20,7 @@ AcmeException::AcmeException(const string& s)
         char buffer[buffSize];
         ERR_error_string(err, buffer);
 
-        what_ = s.size() ? s + ": " : ""s + "OpenSSL error ("s + to_string(err) + "): " + buffer;
+        what_ = (s.size() ? s + ": " : s) + "OpenSSL error (" + to_string(err) + "): " + buffer;
     }
     else
     {
