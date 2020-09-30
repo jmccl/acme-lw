@@ -5,7 +5,6 @@ This project is yet another [_Let's Encrypt_](https://letsencrypt.org) client. I
 * The main artifact is a C++ static library.
 * Functionality only supports creating and updating certificates using http challenges.
 * All code runs 'in process', i.e., no processes are spawned.
-* It runs against the 'V2' (most recent) version of the _Let's Encrypt_ API.
 
 #### Building and Installing
 
@@ -20,6 +19,8 @@ On Red Hat based systems this will do it.
 ```
 yum install cmake openssl-devel curl-devel
 ```
+
+On macOS you'll install prerequisites with your package manager of choice.
 
 To build and install run:
 
