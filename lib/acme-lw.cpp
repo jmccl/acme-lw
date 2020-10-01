@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <ctype.h>
 #include <sstream>
+#include <typeinfo>
 #include <vector>
 
 #include <unistd.h>
@@ -46,7 +47,7 @@ struct Ptr
     {
         if (!ptr_)
         {
-            throw acme_lw::AcmeException("Failed to create OpenSSL type");
+            throw acme_lw::AcmeException("Failed to create "s + typeid(*this).name());
         }
     }
 
@@ -62,7 +63,7 @@ struct Ptr
     {
         if (!ptr.ptr_)
         {
-            throw acme_lw::AcmeException("Failed to create OpenSSL type");
+            throw acme_lw::AcmeException("Failed to create "s + typeid(*this).name());
         }
 
         ptr_ = move(ptr.ptr_);
