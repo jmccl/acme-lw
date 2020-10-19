@@ -247,10 +247,6 @@ pair<string, string> makeCertificateSigningRequest(const std::list<std::string>&
     {
         // We have one or more Subject Alternative Names
         X509_EXTENSIONSptr extensions = sk_X509_EXTENSION_new_null();
-        if (!extensions)
-        {
-            throw acme_lw::AcmeException("Unable to allocate Subject Alternative Name extensions");
-        }
 
         string value;
         do
