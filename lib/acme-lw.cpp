@@ -99,6 +99,13 @@ typedef Ptr<EVP_PKEY, EVP_PKEY_free>                            EVP_PKEYptr;
 typedef Ptr<X509, X509_free>                                    X509ptr;
 typedef Ptr<X509_REQ, X509_REQ_free>                            X509_REQptr;
 
+void freeStackOfExtensions(STACK_OF(X509_EXTENSION) * e)
+{
+    sk_X509_EXTENSION_pop_free(e, X509_EXTENSION_free);
+}
+
+typedef Ptr<STACK_OF(X509_EXTENSION), freeStackOfExtensions>    X509_EXTENSIONSptr;
+
 template<typename T>
 T toT(const vector<char>& v)
 {
@@ -238,28 +245,33 @@ pair<string, string> makeCertificateSigningRequest(const std::list<std::string>&
 
     if (++name != domainNames.end())
     {
-        // We have multiple Subject Alternative Names
-        STACK_OF(X509_EXTENSION) * extensions = sk_X509_EXTENSION_new_null();
+        // We have one or more Subject Alternative Names
+        X509_EXTENSIONSptr extensions = sk_X509_EXTENSION_new_null();
         if (!extensions)
         {
             throw acme_lw::AcmeException("Unable to allocate Subject Alternative Name extensions");
         }
 
+        string value;
         do
         {
-            if (!sk_X509_EXTENSION_push(extensions, X509V3_EXT_conf_nid(nullptr, nullptr, NID_subject_alt_name, ("DNS:"s + (*name)).c_str())))
+            if (!value.empty())
             {
-                throw acme_lw::AcmeException("Unable to add Subject Alternative Name to extensions");
+                value += ", ";
             }
+            value += "DNS:" + *name;
         }
         while (++name != domainNames.end());
 
-        if (X509_REQ_add_extensions(*req, extensions) != 1)
+        if (!sk_X509_EXTENSION_push(*extensions, X509V3_EXT_conf_nid(nullptr, nullptr, NID_subject_alt_name, value.c_str())))
+        {
+            throw acme_lw::AcmeException("Unable to add Subject Alternative Name to extensions");
+        }
+
+        if (X509_REQ_add_extensions(*req, *extensions) != 1)
         {
             throw acme_lw::AcmeException("Unable to add Subject Alternative Names to CSR");
         }
-
-        sk_X509_EXTENSION_pop_free(extensions, X509_EXTENSION_free);
     }
 
     EVP_PKEYptr key(EVP_PKEY_new());
