@@ -315,7 +315,7 @@ string sha256(const string& s)
         throw acme_lw::AcmeException("Error hashing a string");
     }
 
-    return urlSafeBase64Encode<vector<unsigned char>>(hash);
+    return urlSafeBase64Encode(hash);
 }
 
 // https://tools.ietf.org/html/rfc7638
