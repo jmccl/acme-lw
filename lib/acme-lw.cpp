@@ -246,7 +246,7 @@ pair<string, string> makeCertificateSigningRequest(const std::list<std::string>&
     if (++name != domainNames.end())
     {
         // We have one or more Subject Alternative Names
-        X509_EXTENSIONSptr extensions = sk_X509_EXTENSION_new_null();
+        X509_EXTENSIONSptr extensions(sk_X509_EXTENSION_new_null());
 
         string value;
         do
