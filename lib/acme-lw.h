@@ -19,10 +19,10 @@ struct Certificate
     /**
         Returns the number of seconds since 1970, i.e., epoch time.
 
-        Due to openssl quirkiness there might be a little drift
-        from a strictly accurate result, but it should be close
-        enough for the purpose of determining whether the certificate
-        needs to be renewed.
+        Due to openssl quirkiness on older versions (< 1.1.1?) there 
+        might be a little drift from a strictly accurate result, but 
+        it will be close enough for the purpose of determining 
+        whether the certificate needs to be renewed.
     */
     ::time_t getExpiry() const;
 

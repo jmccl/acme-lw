@@ -626,6 +626,18 @@ void AcmeClient::teardown()
 {
     return extractExpiryData<::time_t>(*this, [](const ASN1_TIME * t)
         {
+#ifdef OPENSSL_TO_TM
+            // Prior to openssl 1.1.1 (or so?) ASN1_TIME_to_tm didn't exist so there was no
+            // good way of converting to time_t. If it exists we use the built in function.
+
+            ::tm out;
+            if (!ASN1_TIME_to_tm(t, &out))
+            {
+                throw AcmeException("Failure in ASN1_TIME_to_tm");
+            }
+
+            return timegm(&out);
+#else
             // See this link for issues in converting from ASN1_TIME to epoch time.
             // https://stackoverflow.com/questions/10975542/asn1-time-to-time-t-conversion
 
@@ -639,6 +651,7 @@ void AcmeClient::teardown()
             // the equivilent call openssl just made in the 'diff' call above.
             // Nonetheless, it'll be close at worst.
             return ::time(0) + seconds + days * 3600 * 24;
+#endif
         });
 }
 
