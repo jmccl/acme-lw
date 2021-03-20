@@ -85,6 +85,8 @@ reads the account private key (in PEM format) from disk, so it needs to be reada
 You'll need to decide whether that's acceptable and if so which user you want to use. (You probably want to
 create one solely for this purpose.)
 
+The certificate issued uses a 2,048 bit RSA key.
+
 
 
 
