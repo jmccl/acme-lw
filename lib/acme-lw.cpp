@@ -359,48 +359,46 @@ struct AcmeClientImpl
         : privateKey_(EVP_PKEY_new())
     {
         // Create the private key and 'header suffix', used to sign LE certs.
+        BIOptr bio(BIO_new_mem_buf(accountPrivateKey.c_str(), -1));
+        RSA * rsa(PEM_read_bio_RSAPrivateKey(*bio, nullptr, nullptr, nullptr));
+        if (!rsa)
         {
-            BIOptr bio(BIO_new_mem_buf(accountPrivateKey.c_str(), -1));
-            RSA * rsa(PEM_read_bio_RSAPrivateKey(*bio, nullptr, nullptr, nullptr));
-            if (!rsa)
-            {
-                throw AcmeException("Unable to read private key");
-            }
-
-            // rsa will get freed when privateKey_ is freed
-            if (!EVP_PKEY_assign_RSA(*privateKey_, rsa))
-            {
-                throw AcmeException("Unable to assign RSA to private key");
-            }
-
-            const BIGNUM *n, *e, *d;
-            RSA_get0_key(rsa, &n, &e, &d);
-
-            // Note json keys must be in lexographical order.
-            string jwkValue = u8R"( {
-                                        "e":")"s + urlSafeBase64Encode(e) + u8R"(",
-                                        "kty": "RSA",
-                                        "n":")"s + urlSafeBase64Encode(n) + u8R"("
-                                    })";
-            jwkThumbprint_ = makeJwkThumbprint(jwkValue);
-
-            // We use jwk for the first request, which allows us to get 
-            // the account id. We use that thereafter.
-            headerSuffix_ = u8R"(
-                    "alg": "RS256",
-                    "jwk": )" + jwkValue + "}";
-
-            pair<string, string> header = make_pair("location"s, ""s);
-            sendRequest<string>(newAccountUrl, u8R"(
-                                                    {
-                                                        "termsOfServiceAgreed": true,
-                                                        "onlyReturnExisting": true
-                                                    }
-                                                   )", &header);
-            headerSuffix_ = u8R"(
-                    "alg": "RS256",
-                    "kid": ")" + header.second + "\"}";
+            throw AcmeException("Unable to read private key");
         }
+
+        // rsa will get freed when privateKey_ is freed
+        if (!EVP_PKEY_assign_RSA(*privateKey_, rsa))
+        {
+            throw AcmeException("Unable to assign RSA to private key");
+        }
+
+        const BIGNUM *n, *e, *d;
+        RSA_get0_key(rsa, &n, &e, &d);
+
+        // Note json keys must be in lexographical order.
+        string jwkValue = u8R"( {
+                                    "e":")"s + urlSafeBase64Encode(e) + u8R"(",
+                                    "kty": "RSA",
+                                    "n":")"s + urlSafeBase64Encode(n) + u8R"("
+                                })";
+        jwkThumbprint_ = makeJwkThumbprint(jwkValue);
+
+        // We use jwk for the first request, which allows us to get 
+        // the account id. We use that thereafter.
+        headerSuffix_ = u8R"(
+                "alg": "RS256",
+                "jwk": )" + jwkValue + "}";
+
+        pair<string, string> header = make_pair("location"s, ""s);
+        sendRequest<string>(newAccountUrl, u8R"(
+                                                {
+                                                    "termsOfServiceAgreed": true,
+                                                    "onlyReturnExisting": true
+                                                }
+                                                )", &header);
+        headerSuffix_ = u8R"(
+                "alg": "RS256",
+                "kid": ")" + header.second + "\"}";
     }
 
     string sign(const string& s)
