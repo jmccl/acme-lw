@@ -1,11 +1,17 @@
+/**
+ * If you want to work through what the code is actually doing this has an excellent
+ * description of the protocol being used.
+ *
+ * https://github.com/alexpeattie/letsencrypt-fromscratch
+ */
+
 #include "acme-lw.h"
+
 #include "http.h"
 
 // From here: https://github.com/nlohmann/json/blob/develop/single_include/nlohmann/json.hpp
 // This should probably be a git submodule, but the repo is huge.
 #include "json.hpp"
-
-#include <stdio.h>
 
 #include <openssl/evp.h>
 #include <openssl/pem.h>
@@ -15,10 +21,10 @@
 #include <algorithm>
 #include <ctype.h>
 #include <sstream>
+#include <stdio.h>
 #include <typeinfo>
-#include <vector>
-
 #include <unistd.h>
+#include <vector>
 
 using namespace std;
 
