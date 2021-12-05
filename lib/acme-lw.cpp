@@ -19,16 +19,15 @@
 #include <openssl/x509v3.h>
 
 #include <algorithm>
+#include <chrono>
 #include <ctype.h>
 #include <sstream>
 #include <stdio.h>
+#include <thread>
 #include <typeinfo>
 #include <vector>
-#include <thread>
-#include <chrono>
 
 using namespace std;
-using namespace std::literals;
 
 using namespace acme_lw_internal;
 
@@ -475,7 +474,7 @@ struct AcmeClientImpl
         constexpr int count = 10;
         do
         {
-            std::this_thread::sleep_for(1s);
+            std::this_thread::sleep_for(chrono::seconds(1));
             string response = doPostAsGet(url);
             auto json = nlohmann::json::parse(response);
             if (json.at("status") == "valid")
