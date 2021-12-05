@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.2)
 project (acme_lw_client)
 
-find_package (CURL REQUIRED)
-find_package (OpenSSL REQUIRED)
-
-set (acme_lw_client_VERSION_MAJOR 0)
-set (acme_lw_client_VERSION_MINOR 3)
-set (acme_lw_client_VERSION_PATCH 0)
+include(CheckIncludeFileCXX)
+check_include_file_cxx(filesystem STD_FILESYSTEM)
+if (STD_FILESYSTEM)
 set (CMAKE_CXX_STANDARD 17)
+else()
+set (CMAKE_CXX_STANDARD 14)
+endif()
 
 OPTION(STAGING "Run against the Let's Encrypt staging environment" OFF)
 if (STAGING)

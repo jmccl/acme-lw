@@ -5,12 +5,12 @@
 #include <iostream>
 #include <sstream>
 
-#ifdef EXPERIMENTAL_FILESYSTEM
-#include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
-#else
+#ifdef STD_FILESYSTEM
 #include <filesystem>
 namespace fs = std::filesystem;
+#else
+#include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
 #endif
 
 using namespace std;
