@@ -23,10 +23,12 @@
 #include <sstream>
 #include <stdio.h>
 #include <typeinfo>
-#include <unistd.h>
 #include <vector>
+#include <thread>
+#include <chrono>
 
 using namespace std;
+using namespace std::literals;
 
 using namespace acme_lw_internal;
 
@@ -473,7 +475,7 @@ struct AcmeClientImpl
         constexpr int count = 10;
         do
         {
-            ::usleep(1'000'000);    // sleep for a second
+            std::this_thread::sleep_for(1s);
             string response = doPostAsGet(url);
             auto json = nlohmann::json::parse(response);
             if (json.at("status") == "valid")
