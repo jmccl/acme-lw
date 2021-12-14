@@ -513,6 +513,16 @@ struct AcmeClientImpl
         bool first = true;
         for (const string& domain : domainNames)
         {
+            /*
+            Just check for a '"' in the domain name to make sure that we send 
+            a validly formed json payload. The acme service should validate
+            that the domain name is valid.
+            */
+            if (domain.find('"') != string::npos)
+            {
+                throw AcmeException("Certificate requested for invalid domain name: "s + domain);
+            }
+
             if (!first)
             {
                 payload += ",";
