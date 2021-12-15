@@ -516,7 +516,7 @@ struct AcmeClientImpl
             /*
             Just check for a '"' in the domain name to make sure that we send 
             a validly formed json payload. The acme service should validate
-            that the domain name well formed.
+            that the domain name is well formed.
             */
             if (domain.find('"') != string::npos)
             {
