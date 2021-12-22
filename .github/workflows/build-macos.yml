@@ -1,0 +1,22 @@
+name: MacOS CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: macos-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: install packages
+      run: brew install cmake curl --with-openssl
+    - name: configure
+      run: cmake .
+    - name: make
+      run: make
+    
