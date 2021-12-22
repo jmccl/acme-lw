@@ -14,7 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: install packages
-      run: brew install cmake curl --with-openssl
+      run: brew install cmake curl openssl
     - name: configure
       run: cmake .
     - name: make
