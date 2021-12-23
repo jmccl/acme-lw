@@ -14,9 +14,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: install packages
-      run: brew update && brew install cmake curl openssl && brew link --force openssl && brew info openssl
+      run: brew install cmake curl openssl
     - name: configure
-      run: cmake .
+      # Paths are required as brew won't install openssl to system directories
+      run: cmake cmake -DCMAKE_CXX_FLAGS=-I /usr/local/opt/openssl@3/include -DCMAKE_CXX_FLAGS=-L /usr/local/opt/openssl@3/lib .
     - name: make
       run: make
     
