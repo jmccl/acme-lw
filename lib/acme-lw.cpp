@@ -346,7 +346,7 @@ T extractExpiryData(const acme_lw::Certificate& certificate, const function<T (c
     }
     X509ptr x509(PEM_read_bio_X509(*bio, nullptr, nullptr, nullptr));
 
-    ASN1_TIME * t = X509_getm_notAfter(*x509);
+    const ASN1_TIME * t = X509_get0_notAfter(*x509);
 
     return extractor(t);
 }
