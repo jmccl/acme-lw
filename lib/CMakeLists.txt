@@ -3,7 +3,7 @@ file (GLOB_RECURSE source "*.cpp" "*.h" "../internal/*.h" "../internal/*.cpp")
 add_library(acme_lw ${source})
 
 find_package (CURL REQUIRED)
-find_package (OpenSSL REQUIRED)
+find_package (OpenSSL 1.1 REQUIRED)
 
 install (TARGETS acme_lw DESTINATION lib)
 install (FILES acme-exception.h acme-lw.h DESTINATION include)
