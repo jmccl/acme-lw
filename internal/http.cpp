@@ -72,10 +72,9 @@ size_t dataCallback(void * buffer, size_t size, size_t nmemb, void * response)
     vector<char>& v = *reinterpret_cast<vector<char> *>(response);
 
     size_t byteCount = size * nmemb;
-    string s(reinterpret_cast<const char *>(buffer), byteCount);
 
     size_t initSize = v.size();
-    v.resize(v.size() + byteCount);
+    v.resize(initSize + byteCount);
     memcpy(&v[initSize], buffer, byteCount);
 
     return byteCount;
