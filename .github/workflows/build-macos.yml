@@ -17,10 +17,10 @@ jobs:
       with:
         xcode-version: latest-stable
     - name: install packages
-      run: brew install cmake curl openssl
+      run: brew install cmake curl openssl@1.1
     - name: configure
-      # Paths are required as brew won't install openssl to system directories
-      run: cmake cmake -DCMAKE_CXX_FLAGS=-I /usr/local/opt/openssl@3/include -DCMAKE_CXX_FLAGS=-L /usr/local/opt/openssl@3/lib .
+      # Brew doesn't symlink openssl into system directories so we have to tell cmake where it is
+      run: export OPENSSL_ROOT_DIR=`brew --prefix openssl@1.1` && cmake .
     - name: make
       run: make
     
