@@ -38,10 +38,12 @@ cmake -D STAGING=ON .
 
 #### Let's Encrypt Credentials
 
-To use any _Let's Encrypt_ client you need to sign requests with your existing _Let's Encrypt_'s account's private key.
-This library uses a private key in PEM format. If you want to use an existing _Let's Encrypt_ private key, it's in JWK
-format. The [acme-tiny](https://github.com/diafygi/acme-tiny) library has good documentation on
-[how to convert](https://github.com/diafygi/acme-tiny#use-existing-lets-encrypt-key) it.
+To use any _Let's Encrypt_ client you need to sign requests with the private key of a _Let's Encrypt_'s account.
+You'll want to keep control of that key in case you ever need to revoke the certificates that you issue. (In addition,
+Let's Encrypt [rate limits](https://letsencrypt.org/docs/rate-limits/#:~:text=You%20can%20create%20a%20maximum%20of%2010%20Accounts%20per%20IP,one%20account%20for%20many%20customers) account creation, so you'll normally want to re-use the same account.)
+
+This library uses a private key in PEM format. The [acme-tiny](https://github.com/diafygi/acme-tiny) library has 
+[good documentation](https://github.com/diafygi/acme-tiny#step-1-create-a-lets-encrypt-account-private-key-if-you-havent-already) on how to create a new one or convert an existing certbot key to PEM format.
 
 #### Command Line Client
 

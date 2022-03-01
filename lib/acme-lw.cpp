@@ -400,7 +400,7 @@ struct AcmeClientImpl
         sendRequest<string>(newAccountUrl, u8R"(
                                                 {
                                                     "termsOfServiceAgreed": true,
-                                                    "onlyReturnExisting": true
+                                                    "onlyReturnExisting": false
                                                 }
                                                 )", &header);
         headerSuffix_ = u8R"(
