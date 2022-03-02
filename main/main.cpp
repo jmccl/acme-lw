@@ -55,7 +55,8 @@ int main(int argc, char * argv[])
         // Should be called once per process before a use of AcmeClient.
         acme_lw::AcmeClient::init();
 
-        acme_lw::AcmeClient acmeClient(readFile(argv[1]));
+        string accountPrivateKey = readFile(argv[1]);
+        acme_lw::AcmeClient acmeClient(accountPrivateKey);
 
         list<string> domainNames;
         for (int i = 2; i < argc; ++i)
