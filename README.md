@@ -78,7 +78,7 @@ g++ main.cpp -lacme_lw -lcurl -lcrypto
 
 #### Security
 
-The library itself is fairly agnostic about security. It doesn't read or write to disk. If you use the library
+The library itself is fairly agnostic about security. It doesn't read or write to disk (swapping aside.) If you use the library
 you'll need to decide for yourself how you want to protect the account private key and the private key
 associated with the certificates issued.
 
