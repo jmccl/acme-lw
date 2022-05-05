@@ -42,6 +42,10 @@ struct Certificate
 
 struct AcmeClientImpl;
 
+/**
+ * Each AcmeClient assumes access from a single thread, but different
+ * instances can be instantiated in different threads.
+ */
 class AcmeClient
 {
 public:

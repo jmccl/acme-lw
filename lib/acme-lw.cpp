@@ -19,6 +19,7 @@
 #include <openssl/x509v3.h>
 
 #include <algorithm>
+#include <atomic>
 #include <chrono>
 #include <ctype.h>
 #include <sstream>
@@ -358,7 +359,6 @@ namespace acme_lw
 
 string newAccountUrl;
 string newOrderUrl;
-string newNonceUrl;
 
 struct AcmeClientImpl
 {
@@ -437,7 +437,7 @@ struct AcmeClientImpl
     T sendRequest(const string& url, const string& payload, pair<string, string> * header = nullptr)
     {
         string protectd = u8R"({"nonce": ")"s +
-                                    getHeader(newNonceUrl, "replay-nonce") + "\"," +
+                                    getNonce() + "\"," +
                                     u8R"("url": ")" + url + "\"," +
                                     headerSuffix_;
 
@@ -452,6 +452,24 @@ struct AcmeClientImpl
                         u8R"("signature": ")" + signature + "\"}";
 
         Response response = doPost(url, body, header ? header-> first.c_str() : nullptr);
+
+        static atomic<short> badNonceCount = 0;
+        if (response.badNonce_)
+        {
+            if (++badNonceCount > 10)
+            {
+                // Something's going wrong so let's break out of the 
+                // infinite recusion.
+                throw AcmeException("Getting multiple bad nonces");
+            }
+
+            // Shouldn't happen much. Let's give things a chance to settle down.
+            std::this_thread::sleep_for(chrono::seconds(1));
+
+            return sendRequest<T>(url, payload, header);
+        }
+
+        badNonceCount = 0;
 
         if (header)
         {
@@ -624,7 +642,7 @@ void AcmeClient::init()
         auto json = nlohmann::json::parse(directory);
         newAccountUrl = json.at("newAccount");
         newOrderUrl = json.at("newOrder");
-        newNonceUrl = json.at("newNonce");
+        initNonce(json.at("newNonce"));
     }
     catch (const exception& e)
     {
