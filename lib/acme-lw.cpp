@@ -15,8 +15,13 @@
 
 #include <openssl/evp.h>
 #include <openssl/pem.h>
+#include <openssl/rand.h>
 #include <openssl/rsa.h>
 #include <openssl/x509v3.h>
+
+#if OPENSSL_VERSION_MAJOR >= 3
+#include <openssl/core_names.h>
+#endif
 
 #include <algorithm>
 #include <atomic>
@@ -74,6 +79,11 @@ struct Ptr
             throw acme_lw::AcmeException("Failed to create "s + typeid(*this).name());
         }
 
+        if (ptr_)
+        {
+            FREE(ptr_);
+        }
+
         ptr_ = move(ptr.ptr_);
         ptr.ptr_ = nullptr;
 
@@ -100,12 +110,15 @@ private:
 };
 
 typedef Ptr<BIO, BIO_free_all>                                  BIOptr;
-typedef Ptr<RSA, RSA_free>                                      RSAptr;
 typedef Ptr<BIGNUM, BN_clear_free>                              BIGNUMptr;
 typedef Ptr<EVP_MD_CTX, EVP_MD_CTX_free>                        EVP_MD_CTXptr;
 typedef Ptr<EVP_PKEY, EVP_PKEY_free>                            EVP_PKEYptr;
 typedef Ptr<X509, X509_free>                                    X509ptr;
 typedef Ptr<X509_REQ, X509_REQ_free>                            X509_REQptr;
+
+#if OPENSSL_VERSION_MAJOR < 3
+typedef Ptr<RSA, RSA_free>                                      RSAptr;
+#endif
 
 void freeStackOfExtensions(STACK_OF(X509_EXTENSION) * e)
 {
@@ -223,6 +236,10 @@ string urlSafeBase64Encode(const BIGNUM * bn)
 // returns pair<CSR, privateKey>
 pair<string, string> makeCertificateSigningRequest(const std::list<std::string>& domainNames)
 {
+    const int bits = 2048;
+
+// OpenSSL 3 deprecates some functions and introduces new replacements
+#if OPENSSL_VERSION_MAJOR < 3
     BIGNUMptr bn(BN_new());
     if (!BN_set_word(*bn, RSA_F4))
     {
@@ -231,11 +248,20 @@ pair<string, string> makeCertificateSigningRequest(const std::list<std::string>&
 
     RSAptr rsa(RSA_new());
 
-    int bits = 2048;
     if (!RSA_generate_key_ex(*rsa, bits, *bn, nullptr))
     {
         throw acme_lw::AcmeException("Failure in RSA_generate_key_ex");
     }
+
+    EVP_PKEYptr key(EVP_PKEY_new());
+    if (!EVP_PKEY_assign_RSA(*key, *rsa))
+    {
+        throw acme_lw::AcmeException("Failure in EVP_PKEY_assign_RSA");
+    }
+    rsa.clear();     // rsa will be freed when key is freed.
+#else
+    EVP_PKEYptr key(EVP_RSA_gen(bits));
+#endif
 
     X509_REQptr req(X509_REQ_new());
 
@@ -278,12 +304,6 @@ pair<string, string> makeCertificateSigningRequest(const std::list<std::string>&
         }
     }
 
-    EVP_PKEYptr key(EVP_PKEY_new());
-    if (!EVP_PKEY_assign_RSA(*key, *rsa))
-    {
-        throw acme_lw::AcmeException("Failure in EVP_PKEY_assign_RSA");
-    }
-    rsa.clear();     // rsa will be freed when key is freed.
 
     BIOptr keyBio(BIO_new(BIO_s_mem()));
     if (PEM_write_bio_PrivateKey(*keyBio, *key, nullptr, nullptr, 0, nullptr, nullptr) != 1)
@@ -314,14 +334,16 @@ pair<string, string> makeCertificateSigningRequest(const std::list<std::string>&
 
 string sha256(const string& s)
 {
-    vector<unsigned char> hash(SHA256_DIGEST_LENGTH);
-    SHA256_CTX sha256;
-    if (!SHA256_Init(&sha256) ||
-        !SHA256_Update(&sha256, s.c_str(), s.size()) ||
-        !SHA256_Final(&hash.front(), &sha256))
+    EVP_MD_CTXptr ctx(EVP_MD_CTX_new());
+    vector<unsigned char> hash(EVP_MAX_MD_SIZE);
+    unsigned int hashLength = 0;
+    if (!EVP_DigestInit_ex(*ctx, EVP_sha256(), nullptr) ||
+        !EVP_DigestUpdate(*ctx, s.c_str(), s.size()) ||
+        !EVP_DigestFinal_ex(*ctx, &hash.front(), &hashLength))
     {
         throw acme_lw::AcmeException("Error hashing a string");
     }
+    hash.resize(hashLength);
 
     return urlSafeBase64Encode(hash);
 }
@@ -352,6 +374,14 @@ T extractExpiryData(const acme_lw::Certificate& certificate, const function<T (c
     return extractor(t);
 }
 
+void verifyRandomness()
+{
+    if (!RAND_status())
+    {
+        throw acme_lw::AcmeException("OpenSSL RAND_status failed");
+    }
+}
+
 }
 
 namespace acme_lw
@@ -367,6 +397,11 @@ struct AcmeClientImpl
     {
         // Create the private key and 'header suffix', used to sign LE certs.
         BIOptr bio(BIO_new_mem_buf(accountPrivateKey.c_str(), -1));
+
+        // OpenSSL changed the API for reading RSA key components in version 3
+#if OPENSSL_VERSION_MAJOR < 3
+        const BIGNUM *n, *e, *d;
+
         RSA * rsa(PEM_read_bio_RSAPrivateKey(*bio, nullptr, nullptr, nullptr));
         if (!rsa)
         {
@@ -379,8 +414,16 @@ struct AcmeClientImpl
             throw AcmeException("Unable to assign RSA to private key");
         }
 
-        const BIGNUM *n, *e, *d;
         RSA_get0_key(rsa, &n, &e, &d);
+#else
+        BIGNUMptr nptr(BN_new()), eptr(BN_new());
+        const BIGNUM *n = *nptr;
+        const BIGNUM *e = *eptr;
+
+        privateKey_ = PEM_read_bio_PrivateKey(*bio, nullptr, nullptr, nullptr);
+        EVP_PKEY_get_bn_param(*privateKey_, OSSL_PKEY_PARAM_RSA_N, const_cast<BIGNUM **>(&n));
+        EVP_PKEY_get_bn_param(*privateKey_, OSSL_PKEY_PARAM_RSA_E, const_cast<BIGNUM **>(&e));
+#endif
 
         // Note json keys must be in lexographical order.
         string jwkValue = u8R"( {
@@ -458,7 +501,7 @@ struct AcmeClientImpl
         {
             if (++badNonceCount > 10)
             {
-                // Something's going wrong so let's break out of the 
+                // Something's going wrong so let's break out of the
                 // infinite recusion.
                 throw AcmeException("Getting multiple bad nonces");
             }
@@ -623,6 +666,7 @@ private:
 AcmeClient::AcmeClient(const string& accountPrivateKey)
     : impl_(new AcmeClientImpl(accountPrivateKey))
 {
+    verifyRandomness();
 }
 
 AcmeClient::~AcmeClient() = default;
@@ -635,6 +679,8 @@ Certificate AcmeClient::issueCertificate(const std::list<std::string>& domainNam
 void AcmeClient::init()
 {
     initHttp();
+
+    verifyRandomness();
 
     try
     {
