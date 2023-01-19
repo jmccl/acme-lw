@@ -236,7 +236,9 @@ string urlSafeBase64Encode(const BIGNUM * bn)
 // returns pair<CSR, privateKey>
 pair<string, string> makeCertificateSigningRequest(const std::list<std::string>& domainNames)
 {
-    const int bits = 2048;
+    // Bump from 2048 to 4096
+    // https://www.schneier.com/blog/archives/2023/01/breaking-rsa-with-a-quantum-computer.html
+    const int bits = 4096;
 
 // OpenSSL 3 deprecates some functions and introduces new replacements
 #if OPENSSL_VERSION_MAJOR < 3
