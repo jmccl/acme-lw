@@ -84,7 +84,7 @@ struct Ptr
             FREE(ptr_);
         }
 
-        ptr_ = move(ptr.ptr_);
+        ptr_ = std::move(ptr.ptr_);
         ptr.ptr_ = nullptr;
 
         return *this;

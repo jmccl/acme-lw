@@ -100,7 +100,7 @@ struct NonceCollection
     void addNonce(string&& nonce)
     {
         unique_lock<mutex> lock(mutex_);
-        nonces_.push(move(nonce));
+        nonces_.push(std::move(nonce));
         timeout_ = ::time(nullptr);
     }
 };
@@ -150,7 +150,7 @@ size_t headerCallback(void * buffer, size_t size, size_t nmemb, void * h)
     string nonce = getHeaderValue("replay-nonce", reinterpret_cast<const char *>(buffer), byteCount);
     if (nonce.size())
     {
-        nonceCollection.addNonce(move(nonce));
+        nonceCollection.addNonce(std::move(nonce));
     }
 
     return byteCount;
