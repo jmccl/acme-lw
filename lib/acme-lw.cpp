@@ -428,27 +428,27 @@ struct AcmeClientImpl
 #endif
 
         // Note json keys must be in lexographical order.
-        string jwkValue = u8R"( {
-                                    "e":")"s + urlSafeBase64Encode(e) + u8R"(",
+        string jwkValue = R"( {
+                                    "e":")"s + urlSafeBase64Encode(e) + R"(",
                                     "kty": "RSA",
-                                    "n":")"s + urlSafeBase64Encode(n) + u8R"("
+                                    "n":")"s + urlSafeBase64Encode(n) + R"("
                                 })";
         jwkThumbprint_ = makeJwkThumbprint(jwkValue);
 
         // We use jwk for the first request, which allows us to get 
         // the account id. We use that thereafter.
-        headerSuffix_ = u8R"(
+        headerSuffix_ = R"(
                 "alg": "RS256",
                 "jwk": )" + jwkValue + "}";
 
         pair<string, string> header = make_pair("location"s, ""s);
-        sendRequest<string>(newAccountUrl, u8R"(
+        sendRequest<string>(newAccountUrl, R"(
                                                 {
                                                     "termsOfServiceAgreed": true,
                                                     "onlyReturnExisting": false
                                                 }
                                                 )", &header);
-        headerSuffix_ = u8R"(
+        headerSuffix_ = R"(
                 "alg": "RS256",
                 "kid": ")" + header.second + "\"}";
     }
@@ -481,9 +481,9 @@ struct AcmeClientImpl
     template<typename T>
     T sendRequest(const string& url, const string& payload, pair<string, string> * header = nullptr)
     {
-        string protectd = u8R"({"nonce": ")"s +
+        string protectd = R"({"nonce": ")"s +
                                     getNonce() + "\"," +
-                                    u8R"("url": ")" + url + "\"," +
+                                    R"("url": ")" + url + "\"," +
                                     headerSuffix_;
 
         protectd = urlSafeBase64Encode(protectd);
@@ -492,9 +492,9 @@ struct AcmeClientImpl
         string signature = sign(protectd + "." + payld);
 
         string body = "{"s +
-                        u8R"("protected": ")" + protectd + "\"," +
-                        u8R"("payload": ")" + payld + "\"," +
-                        u8R"("signature": ")" + signature + "\"}";
+                        R"("protected": ")" + protectd + "\"," +
+                        R"("payload": ")" + payld + "\"," +
+                        R"("signature": ")" + signature + "\"}";
 
         Response response = doPost(url, body, header ? header-> first.c_str() : nullptr);
 
@@ -572,7 +572,7 @@ struct AcmeClientImpl
         }
 
         // Create the order        
-        string payload = u8R"({"identifiers": [)";
+        string payload = R"({"identifiers": [)";
         bool first = true;
         for (const string& domain : domainNames)
         {
@@ -592,10 +592,10 @@ struct AcmeClientImpl
             }
             first = false;
 
-            payload += u8R"(
+            payload += R"(
                             {
                                 "type": "dns",
-                                "value": ")"s + domain + u8R"("
+                                "value": ")"s + domain + R"("
                             }
                            )";
         }
@@ -645,8 +645,8 @@ struct AcmeClientImpl
         string csr = r.first;
         string privateKey = r.second;
         string certificateUrl = nlohmann::json::parse(sendRequest<vector<char>>(json.at("finalize"),
-                                                u8R"(   {
-                                                            "csr": ")"s + csr + u8R"("
+                                                R"(   {
+                                                            "csr": ")"s + csr + R"("
                                                         })")).at("certificate");
 
         // Wait for the certificate to be produced
