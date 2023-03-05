@@ -24,7 +24,8 @@ endif ()
 # -Wno-unqualified-std-cast-call is a new clang (15+) warning, which
 # for the moment I'm regarding as misguided, for the reason given here
 # https://www.mail-archive.com/cfe-commits@lists.llvm.org/msg266260.html
-add_compile_options (-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Werror -Wno-unqualified-std-cast-call)
+# This requires -Wno-unknown-warning-option to deal with older clang versions
+add_compile_options (-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Werror -Wno-unqualified-std-cast-call) -Wno-unknown-warning-option
 
 add_subdirectory (lib)
 add_subdirectory (main)
