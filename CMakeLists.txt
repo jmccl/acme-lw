@@ -4,7 +4,7 @@ project (acme_lw_client)
 include(CheckIncludeFileCXX)
 check_include_file_cxx(filesystem STD_FILESYSTEM)
 if (STD_FILESYSTEM)
-   set (CMAKE_CXX_STANDARD 17)
+   set (CMAKE_CXX_STANDARD 20)
 else()
    set (CMAKE_CXX_STANDARD 14)
 endif()
@@ -21,7 +21,10 @@ if (ASAN)
    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address,leak -fno-omit-frame-pointer")
 endif ()
 
-add_compile_options (-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Werror)
+# -Wno-unqualified-std-cast-call is a new clang (15+) warning, which
+# for the moment I'm regarding as misguided, for the reason given here
+# https://www.mail-archive.com/cfe-commits@lists.llvm.org/msg266260.html
+add_compile_options (-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Werror -Wno-unqualified-std-cast-call)
 
 add_subdirectory (lib)
 add_subdirectory (main)
