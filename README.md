@@ -30,12 +30,6 @@ make
 make install
 ```
 
-To run against the _Let's Encrypt_ staging environment generate your makefiles with this.
-
-```
-cmake -D STAGING=ON .
-```
-
 #### Let's Encrypt Credentials
 
 To use any _Let's Encrypt_ client you need to sign requests with the private key of a _Let's Encrypt_'s account.

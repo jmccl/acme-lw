@@ -36,10 +36,6 @@ void handleChallenge(const string& domain, const string& url, const string& keyA
 
 int main(int argc, char * argv[])
 {
-#ifdef STAGING
-    cout << "Running against staging environment.\n\n";
-#endif
-
     if (argc < 3)
     {
         cout << "Usage is 'acme_lw_client <file-name>, <domain-name>, <domain-name>, ...'\n"

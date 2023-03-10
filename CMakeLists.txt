@@ -11,7 +11,7 @@ endif()
 
 OPTION(STAGING "Run against the Let's Encrypt staging environment" OFF)
 if (STAGING)
-   add_definitions (-DSTAGING)
+   message(FATAL_ERROR "Use of the staging environment is no longer controlled at compile time. See 'acme-lw.h' for runtime control.")
 endif ()
 
 OPTION(ASAN "Build with asan" OFF)

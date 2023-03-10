@@ -40,11 +40,8 @@ using namespace acme_lw_internal;
 namespace
 {
 
-#ifdef STAGING
-const char * directoryUrl = "https://acme-staging-v02.api.letsencrypt.org/directory";
-#else
-const char * directoryUrl = "https://acme-v02.api.letsencrypt.org/directory";
-#endif
+const char * productionDirectoryUrl = "https://acme-staging-v02.api.letsencrypt.org/directory";
+const char * stagingDirectoryUrl = "https://acme-v02.api.letsencrypt.org/directory";
 
 // Smart pointers for OpenSSL types
 template<typename TYPE, void (*FREE)(TYPE *)>
@@ -678,8 +675,10 @@ Certificate AcmeClient::issueCertificate(const std::list<std::string>& domainNam
     return impl_->issueCertificate(domainNames, callback);
 }
 
-void AcmeClient::init()
+void AcmeClient::init(Environment env)
 {
+    const char * directoryUrl = (env == Environment::PRODUCTION ? productionDirectoryUrl : stagingDirectoryUrl);
+
     initHttp();
 
     verifyRandomness();

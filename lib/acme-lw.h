@@ -82,13 +82,15 @@ public:
     */
     Certificate issueCertificate(const std::list<std::string>& domainNames, Callback);
 
+    // Contact the Let's Encrypt production or staging environments
+    enum class Environment { PRODUCTION, STAGING };
     /**
         Call once before instantiating AcmeClient.
         
         Note that this calls Let's Encrypt servers and so can throw
         if they're having issues.
     */
-    static void init();
+    static void init(Environment env = Environment::PRODUCTION);
 
     // Call once before application shutdown.
     static void teardown();
