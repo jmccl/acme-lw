@@ -40,8 +40,8 @@ using namespace acme_lw_internal;
 namespace
 {
 
-const char * productionDirectoryUrl = "https://acme-staging-v02.api.letsencrypt.org/directory";
-const char * stagingDirectoryUrl = "https://acme-v02.api.letsencrypt.org/directory";
+const char * stagingDirectoryUrl = "https://acme-staging-v02.api.letsencrypt.org/directory";
+const char * productionDirectoryUrl = "https://acme-v02.api.letsencrypt.org/directory";
 
 // Smart pointers for OpenSSL types
 template<typename TYPE, void (*FREE)(TYPE *)>
