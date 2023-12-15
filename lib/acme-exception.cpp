@@ -16,7 +16,7 @@ AcmeException::AcmeException(const string& s)
 
     if (err)
     {
-        constexpr int buffSize = 120;
+        constexpr int buffSize = 256;
         char buffer[buffSize];
         ERR_error_string(err, buffer);
 
