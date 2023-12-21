@@ -16,9 +16,9 @@ AcmeException::AcmeException(const string& s)
 
     if (err)
     {
-        constexpr int buffSize = 256;
+        constexpr size_t buffSize = 256;
         char buffer[buffSize];
-        ERR_error_string(err, buffer);
+        ERR_error_string_n(err, buffer, buffSize);
 
         what_ = (s.size() ? s + ": " : s) + "OpenSSL error (" + to_string(err) + "): " + buffer;
     }
