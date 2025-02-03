@@ -35,7 +35,7 @@ struct Certificate
 
         For example:
 
-            May  6 21:15:03 2018 GMT
+            May  6 21:15:03 2026 GMT
     */
     std::string getExpiryDisplay() const;
 };
