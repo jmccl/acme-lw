@@ -16,11 +16,9 @@ jobs:
     - uses: maxim-lobanov/setup-xcode@v1
       with:
         xcode-version: latest-stable
-    - name: install packages
-      run: brew install cmake curl openssl@1.1
     - name: configure
       # Brew doesn't symlink openssl into system directories so we have to tell cmake where it is
-      run: export OPENSSL_ROOT_DIR=`brew --prefix openssl@1.1` && cmake .
+      run: export OPENSSL_ROOT_DIR=`brew --prefix openssl@3` && cmake .
     - name: make
       run: make
     

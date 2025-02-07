@@ -41,7 +41,7 @@ This library uses a private key in PEM format. The [acme-tiny](https://github.co
 
 #### Command Line Client
 
-The command line client is run as follows.
+The command line client - fully functional but basically intended at a testbed for the library - is run as follows.
 
 ```
 acme_lw_client <filename of account private key> <domain name> ...
