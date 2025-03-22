@@ -70,6 +70,9 @@ If your code is in _main.cpp_, something like this will build and link.
 g++ main.cpp -lacme_lw -lcurl -lcrypto
 ```
 
+Be aware that this library blocks on IO and will likely take multiple seconds to issue a certificate. Select or create a
+thread being aware of this when using the library.
+
 #### Security
 
 The library itself is fairly agnostic about security. It doesn't read or write to disk (swapping aside.) If you use the library
