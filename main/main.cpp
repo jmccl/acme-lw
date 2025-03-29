@@ -23,10 +23,21 @@ void   writeFile(const string& fileName, const string& contents);
 
 void handleChallenge(const string& domain, const string& url, const string& keyAuthorization)
 {
-    cout << "To verify ownership of " << domain << " make\n\n"
-            << "\t" << url << "\n\nrespond with this\n\n"
-            << "\t" << keyAuthorization << "\n\n"
-            << "Hit any key when done";
+    if (url.find("_acme-challenge.") == 0)
+    {
+        cout << "[DNS Challenge] To verify ownership of " << domain << " create a TXT record with name\n\n"
+                << "\t" << url << "\n\nand set it to the following value\n\n"
+                << "\t" << keyAuthorization << "\n\n"
+                << "Check for DNS propagation by running: nslookup -q=TXT " << url << "\n\n"
+                << "Hit any key when done";
+    }
+    else 
+    {
+        cout << "[HTTP Challenge] To verify ownership of " << domain << " make\n\n"
+                << "\t" << url << "\n\nrespond with this\n\n"
+                << "\t" << keyAuthorization << "\n\n"
+                << "Hit any key when done";
+    }
 
     getchar();
     cout << "\n***\n";
