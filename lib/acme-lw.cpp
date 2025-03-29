@@ -561,7 +561,7 @@ struct AcmeClientImpl
         wait(challengeStatusUrl, "Failure / timeout verifying challenge passed");
     }
 
-    Certificate issueCertificate(const list<string>& domainNames, AcmeClient::Callback callback)
+    Certificate issueCertificate(const list<string>& domainNames, AcmeClient::Callback callback, AcmeClient::Challenge chg)
     {
         if (domainNames.empty())
         {
@@ -622,13 +622,26 @@ struct AcmeClientImpl
                 auto challenges = authz.at("challenges");
                 for (const auto& challenge : challenges)
                 {
-                    if (challenge.at("type") == "http-01")
+                    auto challenge_type = challenge.at("type");
+                    if (chg == AcmeClient::Challenge::HTTP && challenge_type == "http-01")
                     {
                         string token = challenge.at("token");
                         string domain = authz.at("identifier").at("value");
                         string url = "http://"s + domain + "/.well-known/acme-challenge/" + token;
                         string keyAuthorization = token + "." + jwkThumbprint_;
                         callback(domain, url, keyAuthorization);
+
+                        verifyChallengePassed(challenge);
+                        break;
+                    }
+                    else if (chg == AcmeClient::Challenge::DNS && challenge_type == "dns-01")
+                    {
+                        string token = challenge.at("token");
+                        string keyAuthorization = token + "." + jwkThumbprint_;
+                        string domain = authz.at("identifier").at("value");
+                        string txtName = "_acme-challenge." + domain;
+                        string txtValue = sha256(keyAuthorization);
+                        callback(domain, txtName, txtValue);
 
                         verifyChallengePassed(challenge);
                         break;
@@ -670,9 +683,9 @@ AcmeClient::AcmeClient(const string& accountPrivateKey)
 
 AcmeClient::~AcmeClient() = default;
 
-Certificate AcmeClient::issueCertificate(const std::list<std::string>& domainNames, Callback callback)
+Certificate AcmeClient::issueCertificate(const std::list<std::string>& domainNames, Callback callback, Challenge chg)
 {
-    return impl_->issueCertificate(domainNames, callback);
+    return impl_->issueCertificate(domainNames, callback, chg);
 }
 
 void AcmeClient::init(Environment env)

@@ -61,18 +61,24 @@ public:
         The implementation of this function allows Let's Encrypt to
         verify that the requestor has control of the domain name.
 
-        The callback may be called once for each domain name in the
+        [HTTP] The callback may be called once for each domain name in the
         'issueCertificate' call. The callback should do whatever is
         needed so that a GET on the 'url' returns the 'keyAuthorization',
         (which is what the Acme protocol calls the expected response.)
+
+        [DNS] The callback may be called once for each domain name in the
+        'issueCertificate' call. The callback should do whatever is
+        needed so that a DNS query of the TXT record name in 'url'
+        returns the value of 'keyAuthorization', (which is what the Acme
+        protocol calls the expected response.)
 
         Note that this function may not be called in cases where
         Let's Encrypt already believes the caller has control
         of the domain name.
     */
     typedef void (*Callback) (  const std::string& domainName,
-                                const std::string& url,
-                                const std::string& keyAuthorization);
+                                const std::string& url,                         // [HTTP] URL of the GET request; [DNS] record name of the TXT record
+                                const std::string& keyAuthorization);           // [HTTP] Contents of the challenge file; [DNS] contents of the TXT record
 
     /**
         Issue a certificate for the domainNames.
@@ -80,10 +86,14 @@ public:
 
         throws std::exception, usually an instance of acme_lw::AcmeException
     */
-    Certificate issueCertificate(const std::list<std::string>& domainNames, Callback);
+    Certificate issueCertificate(const std::list<std::string>& domainNames, Callback, Challenge chg = Challenge::HTTP);
 
     // Contact the Let's Encrypt production or staging environments
     enum class Environment { PRODUCTION, STAGING };
+
+    // Specify the challenge type (HTTP or DNS). Note that wildcard certificates can only be issued by DNS challenges.
+    enum class Challenge { HTTP, DNS };
+
     /**
         Call once before instantiating AcmeClient.
         
