@@ -80,6 +80,12 @@ public:
                                 const std::string& url,                         // [HTTP] URL of the GET request; [DNS] record name of the TXT record
                                 const std::string& keyAuthorization);           // [HTTP] Contents of the challenge file; [DNS] contents of the TXT record
 
+    // Contact the Let's Encrypt production or staging environments
+    enum class Environment { PRODUCTION, STAGING };
+
+    // Specify the challenge type (HTTP or DNS). Note that wildcard certificates can only be issued by DNS challenges.
+    enum class Challenge { HTTP, DNS };
+
     /**
         Issue a certificate for the domainNames.
         The first one will be the 'Subject' (CN) in the certificate.
@@ -87,12 +93,6 @@ public:
         throws std::exception, usually an instance of acme_lw::AcmeException
     */
     Certificate issueCertificate(const std::list<std::string>& domainNames, Callback, Challenge chg = Challenge::HTTP);
-
-    // Contact the Let's Encrypt production or staging environments
-    enum class Environment { PRODUCTION, STAGING };
-
-    // Specify the challenge type (HTTP or DNS). Note that wildcard certificates can only be issued by DNS challenges.
-    enum class Challenge { HTTP, DNS };
 
     /**
         Call once before instantiating AcmeClient.
