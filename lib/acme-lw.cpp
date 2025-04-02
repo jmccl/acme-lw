@@ -604,7 +604,7 @@ struct AcmeClientImpl
 
         // Pass the challenges
         auto json = nlohmann::json::parse(response);
-        auto authorizations = json.at("authorizations");
+        auto& authorizations = json.at("authorizations");
         bool challenge_found = false;
         for (const auto& authorization : authorizations)
         {
@@ -620,10 +620,16 @@ struct AcmeClientImpl
              */
             if (authz.at("status") != "valid")
             {
-                auto challenges = authz.at("challenges");
+                // If the user requests a wildcard certificate but wants to complete a HTTP challenge, then throw an error:
+                if (chg == AcmeClient::Challenge::HTTP && authz.contains("wildcard") && authz.at("wildcard") == true)
+                {
+                    throw AcmeException("Cannot obtain a wildcard certificate using a HTTP challenge -- use the DNS challenge to create wildcard certificates");
+                }
+
+                auto& challenges = authz.at("challenges");
                 for (const auto& challenge : challenges)
                 {
-                    auto challenge_type = challenge.at("type");
+                    auto& challenge_type = challenge.at("type");
                     if (chg == AcmeClient::Challenge::HTTP && challenge_type == "http-01")
                     {
                         string token = challenge.at("token");
@@ -651,12 +657,6 @@ struct AcmeClientImpl
                     }
                 }
             }
-        }
-
-        // This will typically trigger if a HTTP challenge was requested for a wildcard certificate (which only offers the DNS challenge)
-        if (!challenge_found)
-        {
-            throw AcmeException((chg == AcmeClient::Challenge::HTTP ? "HTTP"s : "DNS"s) + " challenge is unavailable for one of the requested domains");
         }
 
         // Request the certificate
