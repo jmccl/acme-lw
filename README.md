@@ -3,8 +3,9 @@
 This project is yet another [_Let's Encrypt_](https://letsencrypt.org) client. It has the following properties.
 
 * The main artifact is a C++ static library.
-* Functionality only supports creating and updating certificates using http challenges.
+* Functionality supports creating and updating certificates using HTTP and DNS challenges.
 * All code runs 'in process', i.e., no processes are spawned.
+* Wildcard certificates are supported (via the DNS challenge).
 
 #### Building and Installing
 
