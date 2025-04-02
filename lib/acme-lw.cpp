@@ -527,7 +527,7 @@ struct AcmeClientImpl
         return sendRequest<string>(url, "");
     }
 
-    void wait(const string& url, const char * errorText)
+    nlohmann::json wait(const string& url, const char * errorText)
     {
         // Poll waiting for response to the url be 'status': 'valid'
         int counter = 0;
@@ -539,7 +539,7 @@ struct AcmeClientImpl
             auto json = nlohmann::json::parse(response);
             if (json.at("status") == "valid")
             {
-                return;
+                return json;
             }
         } while (counter++ < count);
 
@@ -663,13 +663,14 @@ struct AcmeClientImpl
         auto r = makeCertificateSigningRequest(domainNames);
         string csr = r.first;
         string privateKey = r.second;
-        string certificateUrl = nlohmann::json::parse(sendRequest<vector<char>>(json.at("finalize"),
-                                                R"(   {
-                                                            "csr": ")"s + csr + R"("
-                                                        })")).at("certificate");
+        sendRequest<vector<char>>(json.at("finalize"),
+                                        R"({
+                                            "csr": ")"s + csr + R"("
+                                        })");
 
         // Wait for the certificate to be produced
-        wait(currentOrderUrl, "Timeout / failure waiting for certificate to be produced");
+        auto order = wait(currentOrderUrl, "Timeout / failure waiting for certificate to be produced");
+        string certificateUrl = order.at("certificate");
 
         // Retreive the certificate
         Certificate cert;
