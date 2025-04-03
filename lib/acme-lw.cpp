@@ -605,7 +605,6 @@ struct AcmeClientImpl
         // Pass the challenges
         auto json = nlohmann::json::parse(response);
         auto& authorizations = json.at("authorizations");
-        bool challenge_found = false;
         for (const auto& authorization : authorizations)
         {
             auto authz = nlohmann::json::parse(doPostAsGet(authorization));
@@ -633,7 +632,6 @@ struct AcmeClientImpl
                         callback(domain, url, keyAuthorization);
 
                         verifyChallengePassed(challenge);
-                        challenge_found = true;
                         break;
                     }
                     else if (chg == AcmeClient::Challenge::DNS && challenge_type == "dns-01")
@@ -646,7 +644,6 @@ struct AcmeClientImpl
                         callback(domain, txtName, txtValue);
 
                         verifyChallengePassed(challenge);
-                        challenge_found = true;
                         break;
                     }
                 }
