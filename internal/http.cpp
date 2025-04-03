@@ -10,6 +10,10 @@
 #include <mutex>
 #include <stack>
 
+#ifdef _WIN32
+    #define strncasecmp(x,y,z) _strnicmp(x,y,z)
+#endif
+
 using namespace std;
 
 using namespace acme_lw;
@@ -216,6 +220,8 @@ void getNonce_()
 
     curl_easy_setopt(*curl, CURLOPT_HEADERFUNCTION, &headerCallback);
 
+    curl_easy_setopt(*curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NATIVE_CA);     // Use Schannel on Windows to validate SSL certificates for HTTPS requests
+
     // There will be no response (probably). We just pass this
     // for error handling
     vector<char> response;
@@ -259,6 +265,8 @@ Response doPost(const string& url, const string& postBody, const char * headerKe
     curl_easy_setopt(*curl, CURLOPT_WRITEFUNCTION, dataCallback);
     curl_easy_setopt(*curl, CURLOPT_WRITEDATA, &response.response_);
 
+    curl_easy_setopt(*curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NATIVE_CA);
+
     curl_slist h = { const_cast<char *>("Content-Type: application/jose+json"), nullptr };
     curl_easy_setopt(*curl, CURLOPT_HTTPHEADER, &h);
 
@@ -290,6 +298,8 @@ vector<char> doGet(const string& url)
     curl_easy_setopt(*curl, CURLOPT_URL, url.c_str());
     curl_easy_setopt(*curl, CURLOPT_WRITEFUNCTION, dataCallback);
     curl_easy_setopt(*curl, CURLOPT_WRITEDATA, &response);
+
+    curl_easy_setopt(*curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NATIVE_CA);
 
     doCurl(curl, url, response);
 
