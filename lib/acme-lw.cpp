@@ -620,12 +620,6 @@ struct AcmeClientImpl
              */
             if (authz.at("status") != "valid")
             {
-                // If the user requests a wildcard certificate but wants to complete a HTTP challenge, then throw an error:
-                if (chg == AcmeClient::Challenge::HTTP && authz.contains("wildcard") && authz.at("wildcard") == true)
-                {
-                    throw AcmeException("Cannot obtain a wildcard certificate using a HTTP challenge -- use the DNS challenge to create wildcard certificates");
-                }
-
                 auto& challenges = authz.at("challenges");
                 for (const auto& challenge : challenges)
                 {
