@@ -26,7 +26,7 @@ void handleHTTPChallenge(const string& domain, const string& url, const string& 
     cout << "To verify ownership of " << domain << " make\n\n"
             << "\t" << url << "\n\nrespond with this:\n\n"
             << "\t" << keyAuthorization << "\n\n"
-            << "Hit any 'enter' when done";
+            << "Hit 'enter' when done";
 
     getchar();
     cout << "\n***\n";
@@ -43,7 +43,7 @@ void handleDNSChallenge(const string& domain, const string& dnsTXTname, const st
             << "perhaps by running \"nslookup -q=TXT " << dnsTXTname << "\".\n\n"
             << "(Note that DNS propogation to your host does not necessarily mean that\n"
             << "propagation to the verifying servers has occurred.)\n\n"
-            << "Hit any 'enter' when done";
+            << "Hit 'enter' when done";
 
     getchar();
     cout << "\n***\n";
