@@ -55,7 +55,7 @@ int main(int argc, char * argv[])
 {
     if (argc < 3)
     {
-        cout << "Usage is 'acme_lw_client [options] <file-name>, <domain-name>, <domain-name>, ...'\n"
+        cout << "Usage is 'acme_lw_client <file-name> [options] <domain-name> <domain-name> ...'\n"
                 << "  * <file-name> holds the account private key in pem format\n"
                 << "  * there must be at least one <domain-name>; the first will be the 'Subject' of the certificate\n"
                 << "  * options are:\n"
