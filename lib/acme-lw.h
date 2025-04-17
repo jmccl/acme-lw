@@ -3,6 +3,7 @@
 #include "acme-exception.h"
 
 #include <ctime>
+#include <functional>
 #include <list>
 #include <memory>
 
@@ -76,10 +77,11 @@ public:
         Let's Encrypt already believes the caller has control
         of the domain name.
     */
-    typedef void (*Callback) (  const std::string& domainName,
-                                const std::string& url,                         // [HTTP] URL of the GET request; [DNS] record name of the TXT record
-                                const std::string& keyAuthorization);           // [HTTP] Contents of the challenge file; [DNS] contents of the TXT record
-
+    typedef std::function<void (const std::string& domainName, 
+                                const std::string& url,                 // [HTTP] URL of the GET request; [DNS] record name of the TXT record
+                                const std::string& keyAuthorization)    // [HTTP] Contents of the challenge file; [DNS] contents of the TXT record
+                         > Callback; 
+   
     // Specify the challenge type (HTTP or DNS). Note that wildcard certificates can only be issued by DNS challenges.
     enum class Challenge { HTTP, DNS };
 
