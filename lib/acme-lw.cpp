@@ -184,7 +184,7 @@ string base64Encode(const T& t)
     BIO_set_flags(*b64, BIO_FLAGS_BASE64_NO_NL);
 
     BIO_push(*b64, bio);
-    if (BIO_write(*b64, &t.front(), t.size()) <= 0 ||
+    if (BIO_write(*b64, &t.front(), static_cast<int>(t.size())) <= 0 ||
         BIO_flush(*b64) < 0)
     {
         throw acme_lw::AcmeException("Failure in BIO_write / BIO_flush");
@@ -362,7 +362,7 @@ template<typename T>
 T extractExpiryData(const acme_lw::Certificate& certificate, const function<T (const ASN1_TIME *)>& extractor)
 {
     BIOptr bio(BIO_new(BIO_s_mem()));
-    if (BIO_write(*bio, &certificate.fullchain.front(), certificate.fullchain.size()) <= 0)
+    if (BIO_write(*bio, &certificate.fullchain.front(), static_cast<int>(certificate.fullchain.size())) <= 0)
     {
         throw acme_lw::AcmeException("Failure in BIO_write");
     }
