@@ -1,0 +1,10 @@
+{
+	"dependencies": [
+		{
+			"name": "curl"
+		},
+		{
+			"name": "openssl"
+		}
+	]
+}

@@ -1,4 +1,9 @@
 cmake_minimum_required(VERSION 3.2...3.31)
+   
+if (WIN32)
+   set(CMAKE_TOOLCHAIN_FILE $ENV{VS_ROOT}/VC/vcpkg/scripts/buildsystems/vcpkg.cmake)
+endif()
+
 project (acme_lw_client)
 
 include(CheckIncludeFileCXX)
@@ -25,7 +30,11 @@ endif ()
 # for the moment I'm regarding as misguided, for the reason given here
 # https://www.mail-archive.com/cfe-commits@lists.llvm.org/msg266260.html
 # This requires -Wno-unknown-warning-option to deal with older clang versions
-add_compile_options (-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Werror -Wno-unqualified-std-cast-call -Wno-unknown-warning-option)
+if (NOT WIN32)
+   add_compile_options (-Wall -Wextra -pedantic -Wshadow -Wpointer-arith -Wcast-qual -Werror -Wno-unqualified-std-cast-call -Wno-unknown-warning-option)
+else()
+   add_compile_options (/W4 /WX)
+endif()
 
 add_subdirectory (lib)
 add_subdirectory (main)

@@ -1,0 +1,35 @@
+name: Windows CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: setup cache
+      uses: actions/cache@v4
+      with:
+        key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
+        path: $GITHUB_WORKSPACE\vcpkg-installed
+    - name: install dependencies
+      run: |
+        Install-Module VSSetup -Scope CurrentUser -Force
+        Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy Bypass -Force
+        Import-Module VSSetup
+        $VS_ROOT = (Get-VSSetupInstance | Select-Object -Index 0).InstallationPath
+        & $VS_ROOT\VC\vcpkg\vcpkg-init
+        & $VS_ROOT\VC\vcpkg\vcpkg new --application
+        cp windows\vcpkg.json .
+        & $VS_ROOT\VC\vcpkg\vcpkg install
+    - name: make
+      run: | 
+        mkdir build
+        $env:VS_ROOT=$VS_ROOT; cmd /c "call `"$VS_ROOT\VC\Auxiliary\Build\vcvars64`" && cd build && cmake .. && cmake --build ."
+    
