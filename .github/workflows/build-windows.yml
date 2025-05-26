@@ -30,6 +30,6 @@ jobs:
         & $VS_ROOT\VC\vcpkg\vcpkg install
     - name: make
       run: | 
-        mkdir build
+        mkdir $GITHUB_WORKSPACE\build
         $env:VS_ROOT=$VS_ROOT; cmd /c "call `"$VS_ROOT\VC\Auxiliary\Build\vcvars64`" && cd build && cmake .. && cmake --build ."
     
