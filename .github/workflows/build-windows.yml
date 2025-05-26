@@ -28,8 +28,9 @@ jobs:
         & $VS_ROOT\VC\vcpkg\vcpkg new --application
         cp windows\vcpkg.json .
         & $VS_ROOT\VC\vcpkg\vcpkg install
+        echo "VS_ROOT=$VS_ROOT" >> $GITHUB_ENV
     - name: make
       run: | 
-        mkdir $GITHUB_WORKSPACE\build
+        mkdir build
         $env:VS_ROOT=$VS_ROOT; cmd /c "call `"$VS_ROOT\VC\Auxiliary\Build\vcvars64`" && cd build && cmake .. && cmake --build ."
     
