@@ -9,7 +9,9 @@ This project is yet another [_Let's Encrypt_](https://letsencrypt.org) client. I
 
 #### Building and Installing
 
-Building requires cmake, openssl and curl. On Debian based systems this will install them.
+Building requires cmake, openssl and curl. 
+
+On Debian based systems this will install them.
 
 ```
 apt-get install cmake libssl-dev libcurl4-gnutls-dev
@@ -21,8 +23,6 @@ On Red Hat based systems this will do it.
 yum install cmake openssl-devel curl-devel
 ```
 
-On macOS you'll install prerequisites with your package manager of choice.
-
 To build and install run:
 
 ```
@@ -30,6 +30,9 @@ cmake .
 make
 make install
 ```
+
+The [MacOS](.github/workflows/build-macos.yml) and [Windows](.github/workflows/build-windows.yml) CI actions give 
+examples of how to build on those OSes. FreeBSD does not have a CI action but should build as on Linux.
 
 #### Let's Encrypt Credentials
 
