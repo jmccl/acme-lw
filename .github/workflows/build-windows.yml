@@ -32,5 +32,6 @@ jobs:
       run: | 
         mkdir build
         $VS_ROOT = (Get-VSSetupInstance | Select-Object -Index 0).InstallationPath
-        $env:VS_ROOT=$VS_ROOT; cmd /c "call `"$VS_ROOT\VC\Auxiliary\Build\vcvars64`" && cd build && cmake .. && cmake --build ."
+        $CMAKE_VS_ROOT = $VS_ROOT -replace '\\', '/'
+        $env:VS_ROOT=$VS_ROOT; $env:CMAKE_VS_ROOT=$CMAKE_VS_ROOT; cmd /c "call `"$VS_ROOT\VC\Auxiliary\Build\vcvars64`" && cd build && cmake .. && cmake --build ."
     

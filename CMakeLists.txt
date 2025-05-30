@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.2...3.31)
    
 if (WIN32)
-   set(CMAKE_TOOLCHAIN_FILE $ENV{VS_ROOT}/VC/vcpkg/scripts/buildsystems/vcpkg.cmake)
+   set(CMAKE_TOOLCHAIN_FILE $ENV{CMAKE_VS_ROOT}/VC/vcpkg/scripts/buildsystems/vcpkg.cmake)
 endif()
 
 project (acme_lw_client)
