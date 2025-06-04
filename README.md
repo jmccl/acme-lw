@@ -9,7 +9,7 @@ This project is yet another [_Let's Encrypt_](https://letsencrypt.org) client. I
 
 #### Building and Installing
 
-Building requires cmake, openssl and curl. 
+Building requires cmake, openssl and curl. Mainstream OSes that support those should build.
 
 On Debian based systems this will install them.
 
