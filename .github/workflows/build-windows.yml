@@ -17,7 +17,7 @@ jobs:
       uses: actions/cache@v4
       with:
         key: ${{ runner.os }}-vcpkg-${{ hashFiles('**/vcpkg.json') }}
-        path: $GITHUB_WORKSPACE\vcpkg_installed
+        path: ~\vcpkg_installed
     - name: install dependencies
       run: |
         Install-Module VSSetup -Scope CurrentUser -Force
