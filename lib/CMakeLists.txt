@@ -10,9 +10,8 @@ install (FILES acme-exception.h acme-lw.h DESTINATION include)
 
 include(CheckFunctionExists)
 set(CMAKE_REQUIRED_LIBRARIES OpenSSL::Crypto)
-check_function_exists(ASN1_TIME_to_tm HAS_OPENSSL_TO_TM)
-check_function_exists(timegm HAS_TIMEGM)
-if (OPENSSL_TO_TM AND HAS_TIMEGM)
+check_function_exists(ASN1_TIME_to_tm OPENSSL_TO_TM)
+if (OPENSSL_TO_TM)
 add_definitions(-DOPENSSL_TO_TM)
 endif ()
 

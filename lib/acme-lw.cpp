@@ -730,7 +730,11 @@ void AcmeClient::teardown()
                 throw AcmeException("Failure in ASN1_TIME_to_tm");
             }
 
+#ifdef _WIN32
+            return _mkgmtime(&out);
+#else
             return timegm(&out);
+#endif            
 #else
             // See this link for issues in converting from ASN1_TIME to epoch time.
             // https://stackoverflow.com/questions/10975542/asn1-time-to-time-t-conversion
