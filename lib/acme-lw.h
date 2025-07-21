@@ -62,27 +62,25 @@ public:
         The implementation of this function allows Let's Encrypt to
         verify that the requestor has control of the domain name.
 
-        [HTTP] The callback may be called once for each domain name in the
-        'issueCertificate' call. The callback should do whatever is
-        needed so that a GET on the 'url' returns the 'keyAuthorization',
-        (which is what the Acme protocol calls the expected response.)
+        The callback may be called once for each domain name in the 
+        'issueCertificate' call.
 
-        [DNS] The callback may be called once for each domain name in the
-        'issueCertificate' call. The callback should do whatever is
-        needed so that a DNS query of the TXT record name in 'url'
-        returns the value of 'keyAuthorization', (which is what the Acme
-        protocol calls the expected response.)
+        HTTP: The callback should do whatever is needed so that a GET on 
+        the 'key' url returns the 'keyAuthorization'(which is what the 
+        Acme protocol calls the expected response.)
+
+        DNS: The callback should do whatever is needed so that a 
+        DNS query of the TXT record named 'key' returns the value of 'keyAuthorization'.
 
         Note that this function may not be called in cases where
         Let's Encrypt already believes the caller has control
         of the domain name.
     */
     typedef std::function<void (const std::string& domainName, 
-                                const std::string& url,                 // [HTTP] URL of the GET request; [DNS] record name of the TXT record
-                                const std::string& keyAuthorization)    // [HTTP] Contents of the challenge file; [DNS] contents of the TXT record
+                                const std::string& key,                 // HTTP: URL of the GET request; DNS: record name of the TXT record
+                                const std::string& keyAuthorization)    // HTTP: Response body; DNS: contents of the TXT record
                          > Callback; 
    
-    // Specify the challenge type (HTTP or DNS). Note that wildcard certificates can only be issued by DNS challenges.
     enum class Challenge { HTTP, DNS };
 
     /**
