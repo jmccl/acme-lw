@@ -19,6 +19,7 @@ if (STAGING)
    message(FATAL_ERROR "Use of the staging environment is no longer controlled at compile time. See 'acme-lw.h' for runtime control.")
 endif ()
 
+# To build with asan, generate build files with this: cmake -D ASAN=ON .
 OPTION(ASAN "Build with asan" OFF)
 if (ASAN)
    set(CMAKE_BUILD_TYPE "Debug")
