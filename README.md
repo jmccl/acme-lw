@@ -53,12 +53,6 @@ acme_lw_client <filename of account private key> <domain name> ...
 
 Multiple domain names can be on the command line.
 
-The behavior is similar to the official _Let's Encrypt_ client run as follows:
-
-```
-certbot certonly --manual -d <domain name>
-```
-
 #### Library API
 
 The API of the library is documented in its [header file](lib/acme-lw.h). The command line client [source](main/main.cpp)
