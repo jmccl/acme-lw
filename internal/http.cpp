@@ -7,8 +7,8 @@
 #include <curl/curl.h>
 
 #include <cstring>
+#include <deque>
 #include <mutex>
-#include <stack>
 
 #ifdef _WIN32
     #define strncasecmp(x,y,z) _strnicmp(x,y,z)
@@ -51,13 +51,18 @@ void getNonce_();
 // https://datatracker.ietf.org/doc/html/rfc8555#section-6.5
 struct NonceCollection
 {
-    stack<string> nonces_;
-    time_t        timeout_;
-    mutex         mutex_;
-    short         failCount_;
+    struct Nonce
+    {
+        string nonce_;
+        time_t createdAt_;
+    };
+
+    deque<Nonce> nonces_;
+    mutex        mutex_;
+    short        failCount_;
 
     NonceCollection()
-        : timeout_(0), failCount_(0)
+        : failCount_(0)
     {
     }
 
@@ -72,14 +77,17 @@ struct NonceCollection
                 // Only keep nonces around for 10 minutes. They
                 // expire sometime and it's not super expensive 
                 // to get another one.
-                if (::time(nullptr) - timeout_ > 60 * 10)
+                const time_t now = ::time(nullptr);
+                while (!nonces_.empty() &&
+                       now - nonces_.front().createdAt_ > 60 * 10)
                 {
-                    nonces_ = stack<string>();
+                    nonces_.pop_front();
                 }
-                else
+
+                if (!nonces_.empty())
                 {
-                    nonce = nonces_.top();
-                    nonces_.pop();
+                    nonce = move(nonces_.front().nonce_);
+                    nonces_.pop_front();
                     failCount_ = 0;
                 }
             }
@@ -104,8 +112,7 @@ struct NonceCollection
     void addNonce(string&& nonce)
     {
         unique_lock<mutex> lock(mutex_);
-        nonces_.push(move(nonce));
-        timeout_ = ::time(nullptr);
+        nonces_.push_back(Nonce{move(nonce), ::time(nullptr)});
     }
 };
 
@@ -307,4 +314,3 @@ vector<char> doGet(const string& url)
 }
 
 }
-
