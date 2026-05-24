@@ -133,7 +133,7 @@ T toT(const vector<char>& v)
 template<>
 string toT(const vector<char>& v)
 {
-    return string(&v.front(), v.size());
+    return v.size() ? string(&v.front(), v.size()) : "";
 }
 
 vector<char> toVector(BIO * bio)
@@ -163,7 +163,7 @@ vector<char> toVector(BIO * bio)
 string toString(BIO *bio)
 {
     vector<char> v = toVector(bio);
-    return string(&v.front(), v.size());
+    return toT<string>(v);
 }
 
 template<typename T>

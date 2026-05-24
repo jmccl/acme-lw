@@ -209,7 +209,7 @@ Result doCurl(Ptr& curl, const string& url, const vector<char>& response)
         }
         // If it's not a 2xx response code, throw.
         throw AcmeException("Response code of "s + to_string(responseCode) + " contacting " + url + 
-                            " with response of:\n" + string(&response.front(), response.size()));
+                            " with response of:\n" + (response.size() ? string(&response.front(), response.size()) : ""));
     }
 
     return Result::SUCCESS;
