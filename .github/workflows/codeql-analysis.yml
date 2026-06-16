@@ -22,6 +22,7 @@ jobs:
         language: ['cpp']
         # Learn more...
         # https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#overriding-automatic-language-detection
+	build-mode: none
 
     steps:
     - name: Checkout repository
