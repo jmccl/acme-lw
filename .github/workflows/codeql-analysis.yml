@@ -22,7 +22,6 @@ jobs:
         language: ['cpp']
         # Learn more...
         # https://docs.github.com/en/github/finding-security-vulnerabilities-and-errors-in-your-code/configuring-code-scanning#overriding-automatic-language-detection
-        build-mode: none
 
     steps:
     - name: Checkout repository
@@ -37,6 +36,7 @@ jobs:
       uses: github/codeql-action/init@v4
       with:
          languages: ${{ matrix.language }}
+         build-mode: none
 
     # Install packages needed to build
     - run: sudo apt -y update && sudo apt-get install -y build-essential cmake libssl-dev libcurl4-gnutls-dev
