@@ -1,5 +1,4 @@
-name: Openssl 1.1.1 test
-
+name: Openssl 1.1.1 CI
 on:
   push:
     branches: [ master ]
