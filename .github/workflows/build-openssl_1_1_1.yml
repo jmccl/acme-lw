@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: debian:bullseye
+      image: mirror.gcr.io/library/debian:bullseye             # google mirror of debian:bullseye
       
     steps:
     - uses: actions/checkout@v6
