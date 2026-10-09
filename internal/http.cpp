@@ -227,7 +227,10 @@ void getNonce_()
 
     curl_easy_setopt(*curl, CURLOPT_HEADERFUNCTION, &headerCallback);
 
-    curl_easy_setopt(*curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NATIVE_CA);     // Use Schannel on Windows to validate SSL certificates for HTTPS requests
+#ifdef _WIN32
+    // Use Schannel on Windows to validate SSL certificates for HTTPS requests      
+    curl_easy_setopt(*curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NATIVE_CA);
+#endif
 
     // There will be no response (probably). We just pass this
     // for error handling
@@ -272,7 +275,9 @@ Response doPost(const string& url, const string& postBody, const char * headerKe
     curl_easy_setopt(*curl, CURLOPT_WRITEFUNCTION, dataCallback);
     curl_easy_setopt(*curl, CURLOPT_WRITEDATA, &response.response_);
 
+#ifdef CURLOPT_NATIVE_CA
     curl_easy_setopt(*curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NATIVE_CA);
+#endif
 
     curl_slist h = { const_cast<char *>("Content-Type: application/jose+json"), nullptr };
     curl_easy_setopt(*curl, CURLOPT_HTTPHEADER, &h);
@@ -306,7 +311,9 @@ vector<char> doGet(const string& url)
     curl_easy_setopt(*curl, CURLOPT_WRITEFUNCTION, dataCallback);
     curl_easy_setopt(*curl, CURLOPT_WRITEDATA, &response);
 
+#ifdef CURLOPT_NATIVE_CA    
     curl_easy_setopt(*curl, CURLOPT_SSL_OPTIONS, CURLSSLOPT_NATIVE_CA);
+#endif
 
     doCurl(curl, url, response);
 
