@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: mirror.gcr.io/library/debian:ubuntu:20.04             # google mirror to avoid rate limiting
+      image: mirror.gcr.io/library/ubuntu:20.04             # google mirror to avoid rate limiting
       
     steps:
     - uses: actions/checkout@v6
