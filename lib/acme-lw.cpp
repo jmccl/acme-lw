@@ -264,43 +264,39 @@ pair<string, string> makeCertificateSigningRequest(const std::list<std::string>&
 
     X509_REQptr req(X509_REQ_new());
 
-    auto name = domainNames.begin();
-
     X509_NAME * cn = X509_REQ_get_subject_name(*req);
     if (!X509_NAME_add_entry_by_txt(cn,
                                     "CN",
                                     MBSTRING_ASC,
-                                    reinterpret_cast<const unsigned char*>(name->c_str()),
+                                    reinterpret_cast<const unsigned char*>(domainNames.front().c_str()),
                                     -1, -1, 0))
     {
         throw acme_lw::AcmeException("Failure in X509_Name_add_entry_by_txt");
     }
 
-    if (++name != domainNames.end())
+    // Every requested domain name goes in the Subject Alternative Name,
+    // including the one also used for CN above: RFC 9525 has clients
+    // match identity using SAN only, never CN.
+    X509_EXTENSIONSptr extensions(sk_X509_EXTENSION_new_null());
+
+    string value;
+    for (const auto& domainName : domainNames)
     {
-        // We have one or more Subject Alternative Names
-        X509_EXTENSIONSptr extensions(sk_X509_EXTENSION_new_null());
-
-        string value;
-        do
+        if (!value.empty())
         {
-            if (!value.empty())
-            {
-                value += ", ";
-            }
-            value += "DNS:" + *name;
+            value += ", ";
         }
-        while (++name != domainNames.end());
+        value += "DNS:" + domainName;
+    }
 
-        if (!sk_X509_EXTENSION_push(*extensions, X509V3_EXT_conf_nid(nullptr, nullptr, NID_subject_alt_name, value.c_str())))
-        {
-            throw acme_lw::AcmeException("Unable to add Subject Alternative Name to extensions");
-        }
+    if (!sk_X509_EXTENSION_push(*extensions, X509V3_EXT_conf_nid(nullptr, nullptr, NID_subject_alt_name, value.c_str())))
+    {
+        throw acme_lw::AcmeException("Unable to add Subject Alternative Name to extensions");
+    }
 
-        if (X509_REQ_add_extensions(*req, *extensions) != 1)
-        {
-            throw acme_lw::AcmeException("Unable to add Subject Alternative Names to CSR");
-        }
+    if (X509_REQ_add_extensions(*req, *extensions) != 1)
+    {
+        throw acme_lw::AcmeException("Unable to add Subject Alternative Names to CSR");
     }
 
 
